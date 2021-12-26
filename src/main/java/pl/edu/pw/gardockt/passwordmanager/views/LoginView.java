@@ -1,7 +1,8 @@
 package pl.edu.pw.gardockt.passwordmanager.views;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
-import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -9,13 +10,15 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
+import pl.edu.pw.gardockt.passwordmanager.dialogs.RegistrationDialog;
 
 @Route("login")
 @PageTitle(LoginView.PAGE_TITLE)
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
-    public static final String PAGE_TITLE = "Zaloguj się";
-    private final LoginOverlay loginOverlay = new LoginOverlay();
+    public static final String PAGE_TITLE = Strings.LOGIN;
+    private final LoginForm loginForm = new LoginForm();
+    private final Button registerButton = new Button(Strings.REGISTER);
 
     public LoginView() {
         setSizeFull();
@@ -24,10 +27,13 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         setLoginOverlayStrings();
 
-        loginOverlay.setAction("login");
-        loginOverlay.setForgotPasswordButtonVisible(false);
-        loginOverlay.setOpened(true);
-        add(loginOverlay);
+        loginForm.setAction("login");
+        loginForm.setForgotPasswordButtonVisible(false);
+
+        //registerButton.addClickListener(e -> getUI().ifPresent(ui -> ui.getPage().setLocation("/register")));
+        registerButton.addClickListener(e -> new RegistrationDialog().open());
+
+        add(loginForm, registerButton);
     }
 
     private void setLoginOverlayStrings() {
@@ -44,20 +50,19 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         loginI18n.setHeader(header);
 
         LoginI18n.Form form = new LoginI18n.Form();
-        form.setTitle("Zaloguj się");
-        form.setUsername("Nazwa użytkownika");
-        form.setPassword("Hasło");
-        form.setSubmit("Zaloguj się");
-        form.setForgotPassword("Zapomniałem hasła");
+        form.setTitle(Strings.LOGIN);
+        form.setUsername(Strings.USERNAME);
+        form.setPassword(Strings.PASSWORD);
+        form.setSubmit(Strings.LOGIN);
         loginI18n.setForm(form);
 
-        loginOverlay.setI18n(loginI18n);
+        loginForm.setI18n(loginI18n);
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         if(beforeEnterEvent.getLocation().getQueryParameters().getParameters().containsKey("error")) {
-            loginOverlay.setError(true);
+            loginForm.setError(true);
         }
     }
 
