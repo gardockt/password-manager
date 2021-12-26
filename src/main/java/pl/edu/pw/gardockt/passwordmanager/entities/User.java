@@ -8,8 +8,6 @@ import javax.validation.constraints.NotNull;
 @Table(name = "users")
 public class User {
 
-    // TODO: add remaining fields
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -18,13 +16,27 @@ public class User {
     private String username;
 
     @NotBlank
-    private String password;
+    private String accountPassword;
+
+    @NotBlank
+    private String unlockPassword;
 
     @NotNull
     private Boolean active;
 
     @NotBlank
     private String roles;
+
+    public User() {
+    }
+
+    public User(String username, String accountPassword, String unlockPassword) {
+        this.username = username;
+        this.accountPassword = accountPassword;
+        this.unlockPassword = unlockPassword;
+        this.active = true;
+        this.roles = "user";
+    }
 
     public Long getId() {
         return id;
@@ -42,12 +54,20 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getAccountPassword() {
+        return accountPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setAccountPassword(String accountPassword) {
+        this.accountPassword = accountPassword;
+    }
+
+    public String getUnlockPassword() {
+        return unlockPassword;
+    }
+
+    public void setUnlockPassword(String unlockPassword) {
+        this.unlockPassword = unlockPassword;
     }
 
     public Boolean isActive() {

@@ -11,16 +11,18 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.RegistrationDialog;
+import pl.edu.pw.gardockt.passwordmanager.services.RegistrationService;
 
 @Route("login")
 @PageTitle(LoginView.PAGE_TITLE)
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     public static final String PAGE_TITLE = Strings.LOGIN;
+
     private final LoginForm loginForm = new LoginForm();
     private final Button registerButton = new Button(Strings.REGISTER);
 
-    public LoginView() {
+    public LoginView(RegistrationService registrationService) {
         setSizeFull();
         setAlignItems(FlexComponent.Alignment.CENTER);
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
@@ -31,7 +33,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         loginForm.setForgotPasswordButtonVisible(false);
 
         //registerButton.addClickListener(e -> getUI().ifPresent(ui -> ui.getPage().setLocation("/register")));
-        registerButton.addClickListener(e -> new RegistrationDialog().open());
+        registerButton.addClickListener(e -> new RegistrationDialog(registrationService).open());
 
         add(loginForm, registerButton);
     }
@@ -52,7 +54,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         LoginI18n.Form form = new LoginI18n.Form();
         form.setTitle(Strings.LOGIN);
         form.setUsername(Strings.USERNAME);
-        form.setPassword(Strings.PASSWORD);
+        form.setPassword(Strings.ACCOUNT_PASSWORD);
         form.setSubmit(Strings.LOGIN);
         loginI18n.setForm(form);
 
