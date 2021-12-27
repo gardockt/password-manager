@@ -6,6 +6,7 @@ public class Strings {
 
     public static final String CONFIRM = "Potwierdź";
     public static final String CANCEL = "Anuluj";
+    public static final String CLOSE = "Zamknij";
 
     public static final String ERROR_OCCURRED = "Wystąpił błąd";
 

@@ -1,0 +1,66 @@
+package pl.edu.pw.gardockt.passwordmanager.dialogs;
+
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
+import pl.edu.pw.gardockt.passwordmanager.Strings;
+import pl.edu.pw.gardockt.passwordmanager.entities.Password;
+import pl.edu.pw.gardockt.passwordmanager.security.EncryptionAlgorithm;
+
+public class UnlockPasswordDialog extends Dialog {
+
+    // TODO: compare with hash (may use HMAC instead)
+
+    private final Password password;
+
+    private final PasswordField unlockPasswordField = new PasswordField();
+    private final Button confirmButton = new Button(Strings.CONFIRM, e -> unlock());
+    private final Button cancelButton = new Button(Strings.CANCEL, e -> close());
+
+    public UnlockPasswordDialog(Password password) {
+        this.password = password;
+
+        confirmButton.setWidthFull();
+        cancelButton.setWidthFull();
+
+        confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        unlockPasswordField.setWidthFull();
+
+        HorizontalLayout buttonLayout = new HorizontalLayout(confirmButton, cancelButton);
+        buttonLayout.setWidthFull();
+
+        H3 title = new H3(password.getDescription());
+        title.addClassName("mt-0");
+
+        VerticalLayout layout = new VerticalLayout(
+                title,
+                new Label("Podaj hasło odblokowujące"),
+                unlockPasswordField,
+                buttonLayout
+        );
+        layout.setMinWidth("20em");
+        add(layout);
+    }
+
+    private void unlock() {
+        // TODO: count attempts
+        try {
+            String decryptedPassword = EncryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
+            Password unlockedPassword = password.clone();
+            unlockedPassword.setPassword(decryptedPassword);
+            new PasswordDialog(unlockedPassword).open();
+            close();
+        } catch (Exception e) {
+            Notification.show("Błąd podczas odblokowywania hasła");
+        }
+    }
+
+}

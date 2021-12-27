@@ -7,6 +7,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import org.springframework.security.core.context.SecurityContextHolder;
+import pl.edu.pw.gardockt.passwordmanager.dialogs.UnlockPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
@@ -40,7 +41,7 @@ public class PasswordListView extends VerticalLayout {
         //passwordGrid.getColumns().forEach(col -> col.setAutoWidth(true));
         passwordGrid.asSingleSelect().addValueChangeListener(e -> {
             if(e.getValue() != null) {
-                Notification.show(e.getValue().getPassword());
+                new UnlockPasswordDialog(e.getValue()).open();
                 passwordGrid.asSingleSelect().setValue(null);
             }
         });

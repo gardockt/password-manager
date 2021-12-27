@@ -23,6 +23,16 @@ public class Password {
     @NotBlank
     private String description;
 
+    public Password() {
+    }
+
+    public Password(Long id, User user, String password, String description) {
+        this.id = id;
+        this.user = user;
+        this.password = password;
+        this.description = description;
+    }
+
     public Long getId() {
         return id;
     }
@@ -54,4 +64,13 @@ public class Password {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public Password clone() {
+        try {
+            return (Password) super.clone();
+        } catch(CloneNotSupportedException e) {
+            return new Password(id, user, password, description);
+        }
+    }
+
 }
