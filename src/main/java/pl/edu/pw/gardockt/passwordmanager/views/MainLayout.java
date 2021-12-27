@@ -3,17 +3,17 @@ package pl.edu.pw.gardockt.passwordmanager.views;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.ListItem;
-import com.vaadin.flow.component.html.Nav;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.html.UnorderedList;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
+import org.springframework.security.core.context.SecurityContextHolder;
+import pl.edu.pw.gardockt.passwordmanager.Strings;
+import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
+import pl.edu.pw.gardockt.passwordmanager.security.SecurityService;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +51,11 @@ public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
 
-    public MainLayout() {
+    private final SecurityService securityService;
+
+    public MainLayout(SecurityService securityService) {
+        this.securityService = securityService;
+
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         addToDrawer(createDrawerContent());
@@ -73,7 +77,7 @@ public class MainLayout extends AppLayout {
     }
 
     private Component createDrawerContent() {
-        H2 appName = new H2("Password Manager");
+        H2 appName = new H2(Strings.APP_TITLE);
         appName.addClassNames("flex", "items-center", "h-xl", "m-0", "px-m", "text-m");
 
         com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
@@ -131,10 +135,16 @@ public class MainLayout extends AppLayout {
     }
 
     private Footer createFooter() {
-        Footer layout = new Footer();
+        VerticalLayout layout = new VerticalLayout();
         layout.addClassNames("flex", "items-center", "my-s", "px-m", "py-xs");
 
-        return layout;
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Button logoutButton = new Button("Wyloguj się", e -> securityService.logout());
+        logoutButton.setWidthFull();
+
+        layout.add(new Label("Zalogowano jako " + userDetails.getUsername()), logoutButton);
+        return new Footer(layout);
     }
 
     @Override
