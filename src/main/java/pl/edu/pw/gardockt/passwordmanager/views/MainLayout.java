@@ -16,8 +16,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
 import java.util.ArrayList;
 import java.util.List;
-import pl.edu.pw.gardockt.passwordmanager.views.about.AboutView;
-import pl.edu.pw.gardockt.passwordmanager.views.helloworld.HelloWorldView;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -103,9 +101,7 @@ public class MainLayout extends AppLayout {
 
     private List<RouterLink> createLinks() {
         MenuItemInfo[] menuItems = new MenuItemInfo[]{ //
-                new MenuItemInfo("Hello World", "la la-globe", HelloWorldView.class), //
-
-                new MenuItemInfo("About", "la la-file", AboutView.class), //
+                new MenuItemInfo(PasswordListView.PAGE_TITLE, "la la-file", PasswordListView.class),
 
         };
         List<RouterLink> links = new ArrayList<>();
