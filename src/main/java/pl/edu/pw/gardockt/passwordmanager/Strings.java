@@ -19,4 +19,12 @@ public class Strings {
     public static final String UNLOCK_PASSWORD = "Hasło odblokowujące";
     public static final String REPEAT_UNLOCK_PASSWORD = "Powtórz hasło odblokowujące";
 
+    public static final String ADD_PASSWORD = "Dodaj hasło";
+    public static final String PASSWORD_DESCRIPTION = "Opis";
+
+    public static final String BLANK_STRING_ERROR = "wartość nie powinna być pusta";
+    public static final String PASSWORDS_NOT_MATCHING_ERROR = "podane hasła są różne";
+    public static final String ILLEGAL_FIELD_VALUES_ERROR = "Nie wszystkie pola zostały poprawnie wypełnione";
+    public static final String GENERIC_ERROR = "Wystąpił błąd";
+
 }

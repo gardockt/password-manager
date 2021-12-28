@@ -62,7 +62,7 @@ public class RegistrationDialog extends Dialog {
         accountPasswordField.addClassName("py-s");
         repeatAccountPasswordField.addClassName("py-s");
         unlockPasswordField.addClassName("py-s");
-        repeatUnlockPasswordField.addClassName("py-s+");
+        repeatUnlockPasswordField.addClassName("py-s");
 
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);

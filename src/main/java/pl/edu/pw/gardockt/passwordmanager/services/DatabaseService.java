@@ -20,4 +20,11 @@ public class DatabaseService {
         return passwordRepository.findByUser(user);
     }
 
+    public void addPassword(Password password) {
+        if(password == null) {
+            throw new IllegalArgumentException("Password is null");
+        }
+        passwordRepository.save(password);
+    }
+
 }
