@@ -13,6 +13,7 @@ import pl.edu.pw.gardockt.passwordmanager.dialogs.UnlockPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
+import pl.edu.pw.gardockt.passwordmanager.security.PasswordVerifier;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 
@@ -26,6 +27,7 @@ public class PasswordListView extends VerticalLayout {
     public final static String PAGE_TITLE = "Lista haseł";
 
     private final SecurityConfiguration securityConfiguration;
+    private final PasswordVerifier passwordVerifier;
 
     private final User user;
 
@@ -33,9 +35,10 @@ public class PasswordListView extends VerticalLayout {
 
     private final Grid<Password> passwordGrid = new Grid<>(Password.class);
 
-    public PasswordListView(SecurityConfiguration securityConfiguration, DatabaseService databaseService) {
+    public PasswordListView(SecurityConfiguration securityConfiguration, DatabaseService databaseService, PasswordVerifier passwordVerifier) {
         this.securityConfiguration = securityConfiguration;
         this.databaseService = databaseService;
+        this.passwordVerifier = passwordVerifier;
 
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userDetails.getUser();
@@ -62,7 +65,7 @@ public class PasswordListView extends VerticalLayout {
     }
 
     private void openAddPasswordDialog() {
-        AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration);
+        AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration, passwordVerifier);
         dialog.addListener(AddPasswordDialog.SavePasswordEvent.class, this::addPassword);
         dialog.open();
     }

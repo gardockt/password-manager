@@ -55,7 +55,7 @@ public class UnlockPasswordDialog extends Dialog {
     }
 
     private void unlock() {
-        // TODO: count attempts
+        // TODO: count attempts (use PasswordVerifier?)
         try {
             String decryptedPassword = encryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
             Password unlockedPassword = password.clone();
@@ -63,7 +63,7 @@ public class UnlockPasswordDialog extends Dialog {
             new PasswordDialog(unlockedPassword).open();
             close();
         } catch (AEADBadTagException e) {
-            Notification.show(Strings.INCORRECT_PASSWORD_ERROR);
+            Notification.show(Strings.INCORRECT_UNLOCK_PASSWORD_ERROR);
         } catch (Exception e) {
             Notification.show(Strings.GENERIC_ERROR);
             e.printStackTrace();

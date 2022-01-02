@@ -46,8 +46,7 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         // TODO: GCMParameterSpec
 
         cipher.init(Cipher.ENCRYPT_MODE, generateKeySpec(password, salt));
-        cipher.update(message.getBytes(StandardCharsets.UTF_8));
-        byte[] encryptedMessage = cipher.doFinal();
+        byte[] encryptedMessage = cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
         byte[] iv = cipher.getIV();
 
         byte[] cryptogram = new byte[ivLength + saltLength + encryptedMessage.length];
@@ -73,8 +72,7 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         GCMParameterSpec parameters = new GCMParameterSpec(tagLength, iv);
 
         cipher.init(Cipher.DECRYPT_MODE, generateKeySpec(password, salt), parameters);
-        cipher.update(encryptedMessage);
-        byte[] message = cipher.doFinal();
+        byte[] message = cipher.doFinal(encryptedMessage);
 
         return new String(message);
     }
