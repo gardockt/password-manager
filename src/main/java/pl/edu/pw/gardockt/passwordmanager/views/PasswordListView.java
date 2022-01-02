@@ -13,6 +13,7 @@ import pl.edu.pw.gardockt.passwordmanager.dialogs.UnlockPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
+import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 
 import javax.annotation.security.PermitAll;
@@ -24,13 +25,16 @@ public class PasswordListView extends VerticalLayout {
 
     public final static String PAGE_TITLE = "Lista haseł";
 
+    private final SecurityConfiguration securityConfiguration;
+
     private final User user;
 
     private final DatabaseService databaseService;
 
     private final Grid<Password> passwordGrid = new Grid<>(Password.class);
 
-    public PasswordListView(DatabaseService databaseService) {
+    public PasswordListView(SecurityConfiguration securityConfiguration, DatabaseService databaseService) {
+        this.securityConfiguration = securityConfiguration;
         this.databaseService = databaseService;
 
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -44,7 +48,7 @@ public class PasswordListView extends VerticalLayout {
         //passwordGrid.getColumns().forEach(col -> col.setAutoWidth(true));
         passwordGrid.asSingleSelect().addValueChangeListener(e -> {
             if(e.getValue() != null) {
-                new UnlockPasswordDialog(e.getValue()).open();
+                new UnlockPasswordDialog(securityConfiguration, e.getValue()).open();
                 passwordGrid.asSingleSelect().setValue(null);
             }
         });
@@ -58,7 +62,7 @@ public class PasswordListView extends VerticalLayout {
     }
 
     private void openAddPasswordDialog() {
-        AddPasswordDialog dialog = new AddPasswordDialog();
+        AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration);
         dialog.addListener(AddPasswordDialog.SavePasswordEvent.class, this::addPassword);
         dialog.open();
     }

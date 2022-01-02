@@ -26,5 +26,6 @@ public class Strings {
     public static final String PASSWORDS_NOT_MATCHING_ERROR = "podane hasła są różne";
     public static final String ILLEGAL_FIELD_VALUES_ERROR = "Nie wszystkie pola zostały poprawnie wypełnione";
     public static final String GENERIC_ERROR = "Wystąpił błąd";
+    public static final String INCORRECT_PASSWORD_ERROR = "Błędne hasło";
 
 }

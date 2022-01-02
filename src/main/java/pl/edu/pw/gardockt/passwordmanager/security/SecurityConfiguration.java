@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.AES256GCMEncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
 import pl.edu.pw.gardockt.passwordmanager.views.LoginView;
 
 @EnableWebSecurity
@@ -40,6 +42,11 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public EncryptionAlgorithm getEncryptionAlgorithm() {
+        return new AES256GCMEncryptionAlgorithm();
     }
 
 }

@@ -21,11 +21,15 @@ import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
-import pl.edu.pw.gardockt.passwordmanager.security.EncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.AES256GCMEncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
 
 public class AddPasswordDialog extends Dialog {
 
     // TODO: add password generation?
+
+    private final EncryptionAlgorithm encryptionAlgorithm;
 
     private final TextField descriptionField = new TextField(Strings.PASSWORD_DESCRIPTION);
     private final PasswordField passwordField = new PasswordField(Strings.ACCOUNT_PASSWORD);
@@ -37,7 +41,9 @@ public class AddPasswordDialog extends Dialog {
 
     private Password password = new Password();
 
-    public AddPasswordDialog() {
+    public AddPasswordDialog(SecurityConfiguration securityConfiguration) {
+        encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
+
         H3 title = new H3(Strings.ADD_PASSWORD);
         title.addClassName("mt-0");
 
@@ -75,12 +81,15 @@ public class AddPasswordDialog extends Dialog {
 
         try {
             binder.writeBean(password);
-            password.setPassword(EncryptionAlgorithm.encrypt(password.getPassword(), "")); // TODO: FIX KEY!!!
+            password.setPassword(encryptionAlgorithm.encrypt(password.getPassword(), "")); // TODO: FIX PASSWORD!!!
             password.setUser(userDetails.getUser());
             fireEvent(new SavePasswordEvent(this, password));
             close();
         } catch (ValidationException e) {
             Notification.show(Strings.ILLEGAL_FIELD_VALUES_ERROR);
+            e.printStackTrace();
+        } catch (Exception e) {
+            Notification.show(Strings.GENERIC_ERROR);
             e.printStackTrace();
         }
     }

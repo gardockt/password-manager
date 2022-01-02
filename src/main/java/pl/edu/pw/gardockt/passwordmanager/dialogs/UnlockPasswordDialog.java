@@ -11,11 +11,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
-import pl.edu.pw.gardockt.passwordmanager.security.EncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
+
+import javax.crypto.AEADBadTagException;
 
 public class UnlockPasswordDialog extends Dialog {
 
-    // TODO: compare with hash (may use HMAC instead)
+    EncryptionAlgorithm encryptionAlgorithm;
 
     private final Password password;
 
@@ -23,7 +26,8 @@ public class UnlockPasswordDialog extends Dialog {
     private final Button confirmButton = new Button(Strings.CONFIRM, e -> unlock());
     private final Button cancelButton = new Button(Strings.CANCEL, e -> close());
 
-    public UnlockPasswordDialog(Password password) {
+    public UnlockPasswordDialog(SecurityConfiguration securityConfiguration, Password password) {
+        this.encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
         this.password = password;
 
         confirmButton.setWidthFull();
@@ -53,13 +57,16 @@ public class UnlockPasswordDialog extends Dialog {
     private void unlock() {
         // TODO: count attempts
         try {
-            String decryptedPassword = EncryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
+            String decryptedPassword = encryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
             Password unlockedPassword = password.clone();
             unlockedPassword.setPassword(decryptedPassword);
             new PasswordDialog(unlockedPassword).open();
             close();
+        } catch (AEADBadTagException e) {
+            Notification.show(Strings.INCORRECT_PASSWORD_ERROR);
         } catch (Exception e) {
-            Notification.show("Błąd podczas odblokowywania hasła");
+            Notification.show(Strings.GENERIC_ERROR);
+            e.printStackTrace();
         }
     }
 
