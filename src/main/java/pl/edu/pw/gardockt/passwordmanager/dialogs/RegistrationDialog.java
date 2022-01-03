@@ -10,16 +10,20 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
+import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
+import pl.edu.pw.gardockt.passwordmanager.security.PasswordStrengthCalculator;
+import pl.edu.pw.gardockt.passwordmanager.security.SimplePasswordStrengthCalculator;
 import pl.edu.pw.gardockt.passwordmanager.services.RegistrationService;
 
 public class RegistrationDialog extends Dialog {
 
     private final RegistrationService registrationService;
+    private final PasswordStrengthCalculator calculator = new SimplePasswordStrengthCalculator();
 
     private final TextField usernameField = new TextField(Strings.USERNAME);
-    private final PasswordField accountPasswordField = new PasswordField(Strings.ACCOUNT_PASSWORD);
+    private final PasswordFieldWithStrength accountPasswordField = new PasswordFieldWithStrength(calculator, Strings.ACCOUNT_PASSWORD);
     private final PasswordField repeatAccountPasswordField = new PasswordField(Strings.REPEAT_ACCOUNT_PASSWORD);
-    private final PasswordField unlockPasswordField = new PasswordField(Strings.UNLOCK_PASSWORD);
+    private final PasswordFieldWithStrength unlockPasswordField = new PasswordFieldWithStrength(calculator, Strings.UNLOCK_PASSWORD);
     private final PasswordField repeatUnlockPasswordField = new PasswordField(Strings.REPEAT_UNLOCK_PASSWORD);
     private final Button registerButton = new Button(Strings.CONFIRM);
     private final Button cancelButton = new Button(Strings.CANCEL);
@@ -79,7 +83,7 @@ public class RegistrationDialog extends Dialog {
         // TODO: add validation
 
         try {
-            registrationService.register(usernameField.getValue(), accountPasswordField.getValue(), unlockPasswordField.getValue());
+            registrationService.register(usernameField.getValue(), accountPasswordField.getPasswordField().getValue(), unlockPasswordField.getPasswordField().getValue());
             Notification.show("Zarejestrowano pomyślnie");
             close();
         } catch(Exception e) {

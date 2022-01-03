@@ -20,10 +20,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
+import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
 import pl.edu.pw.gardockt.passwordmanager.security.PasswordVerifier;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
+import pl.edu.pw.gardockt.passwordmanager.security.SimplePasswordStrengthCalculator;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
 
 import java.security.SecureRandom;
@@ -44,7 +46,7 @@ public class AddPasswordDialog extends Dialog {
     private final Collection<Password> existingPasswords;
 
     private final TextField descriptionField = new TextField(Strings.PASSWORD_DESCRIPTION);
-    private final PasswordField passwordField = new PasswordField(Strings.ACCOUNT_PASSWORD);
+    private final PasswordFieldWithStrength passwordField = new PasswordFieldWithStrength(new SimplePasswordStrengthCalculator(), Strings.ACCOUNT_PASSWORD);
     private final PasswordField repeatPasswordField = new PasswordField(Strings.REPEAT_ACCOUNT_PASSWORD);
     private final PasswordField unlockPasswordField = new PasswordField(Strings.UNLOCK_PASSWORD);
     private final Button confirmButton = new Button(Strings.CONFIRM, e -> validateAndAddPassword());
@@ -85,9 +87,9 @@ public class AddPasswordDialog extends Dialog {
                 .withValidator(new StringLengthValidator(StringGenerator.getLengthError(1, 64), 1, 64))
                 .withValidator(text -> !text.isBlank(), Strings.BLANK_STRING_ERROR)
                 .bind(Password::getDescription, Password::setDescription);
-        binder.forField(passwordField).bind(Password::getPassword, Password::setPassword);
+        binder.forField(passwordField.getPasswordField()).bind(Password::getPassword, Password::setPassword);
         binder.forField(repeatPasswordField)
-                .withValidator(text -> passwordField.getValue().equals(text), Strings.PASSWORDS_NOT_MATCHING_ERROR)
+                .withValidator(text -> passwordField.getPasswordField().getValue().equals(text), Strings.PASSWORDS_NOT_MATCHING_ERROR)
                 .bind(Password::getPassword, Password::setPassword);
         binder.bindInstanceFields(this);
     }
