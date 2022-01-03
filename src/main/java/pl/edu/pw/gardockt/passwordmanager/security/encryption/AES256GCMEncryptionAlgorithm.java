@@ -10,13 +10,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
 
     // TODO: fix key/message containing dialects (result varying on locale)
     // TODO: fix potential timing attack
-    // TODO: mask message length
+    // TODO: change String to char[]?
 
     private static final String keyFactoryAlgorithm = "PBKDF2WithHmacSHA256";
     private static final String keyAlgorithm = "AES";
@@ -28,6 +29,7 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
     private static final int tagLength = 16 * 8;
 
     private static final int iterationCount = 65536;
+    private static final int maskingLength = 32;
 
     private SecretKeySpec generateKeySpec(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength);
@@ -37,6 +39,13 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
     }
 
     public String encrypt(String message, String password, byte[] iv) throws Exception {
+        // add padding to hide message's length
+        if(message.length() < maskingLength) {
+            char[] masking = new char[maskingLength - message.length()];
+            Arrays.fill(masking, '\0');
+            message = message.concat(new String(masking));
+        }
+
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[saltLength];
         random.nextBytes(salt);
@@ -73,7 +82,12 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         cipher.init(Cipher.DECRYPT_MODE, generateKeySpec(password, salt), parameters);
         byte[] message = cipher.doFinal(encryptedMessage);
 
-        return new String(message);
+        int newLength = message.length;
+        while(message[newLength - 1] == '\0') {
+            newLength--;
+        }
+
+        return new String(Arrays.copyOf(message, newLength));
     }
 
 }
