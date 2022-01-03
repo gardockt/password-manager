@@ -26,12 +26,22 @@ import pl.edu.pw.gardockt.passwordmanager.security.PasswordVerifier;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
 
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+// TODO: add password count limit (1000?)
+
 public class AddPasswordDialog extends Dialog {
 
     // TODO: add password generation?
 
     private final PasswordVerifier passwordVerifier;
     private final EncryptionAlgorithm encryptionAlgorithm;
+
+    private final Collection<Password> existingPasswords;
 
     private final TextField descriptionField = new TextField(Strings.PASSWORD_DESCRIPTION);
     private final PasswordField passwordField = new PasswordField(Strings.ACCOUNT_PASSWORD);
@@ -44,9 +54,10 @@ public class AddPasswordDialog extends Dialog {
 
     private final Password password = new Password();
 
-    public AddPasswordDialog(SecurityConfiguration securityConfiguration, PasswordVerifier passwordVerifier) {
+    public AddPasswordDialog(SecurityConfiguration securityConfiguration, PasswordVerifier passwordVerifier, Collection<Password> existingPasswords) {
         this.passwordVerifier = passwordVerifier;
-        encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
+        this.encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
+        this.existingPasswords = existingPasswords;
 
         H3 title = new H3(Strings.ADD_PASSWORD);
         title.addClassName("mt-0");
@@ -91,7 +102,7 @@ public class AddPasswordDialog extends Dialog {
                 throw new BadCredentialsException(Strings.INCORRECT_UNLOCK_PASSWORD_ERROR);
             }
 
-            password.setPassword(encryptionAlgorithm.encrypt(password.getPassword(), unlockPasswordField.getValue()));
+            password.setPassword(encryptionAlgorithm.encrypt(password.getPassword(), unlockPasswordField.getValue(), generateUniqueIV()));
             password.setUser(userDetails.getUser());
             fireEvent(new SavePasswordEvent(this, password));
             close();
@@ -103,6 +114,25 @@ public class AddPasswordDialog extends Dialog {
             Notification.show(Strings.GENERIC_ERROR);
             e.printStackTrace();
         }
+    }
+
+    private byte[] generateUniqueIV() {
+        int ivLength = 12; // should be divisible by 3, see below
+
+        Collection<byte[]> existingIVs = existingPasswords.stream().map(
+                p -> Base64.getDecoder().decode(p.getPassword().substring(0, ivLength * 4 / 3))
+        ).collect(Collectors.toList());
+
+        SecureRandom random = new SecureRandom();
+        byte[] iv = new byte[ivLength];
+        do {
+            random.nextBytes(iv);
+        } while (containsIV(existingIVs, iv));
+        return iv;
+    }
+
+    private boolean containsIV(Collection<byte[]> existingIVs, byte[] iv) {
+        return existingIVs.stream().anyMatch(eiv -> Arrays.equals(iv, eiv));
     }
 
     public static abstract class AddPasswordDialogEvent extends ComponentEvent<AddPasswordDialog> {

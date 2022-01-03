@@ -18,6 +18,7 @@ import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 
 import javax.annotation.security.PermitAll;
+import java.util.Collection;
 
 @PageTitle(PasswordListView.PAGE_TITLE)
 @Route(value = "", layout = MainLayout.class)
@@ -27,11 +28,11 @@ public class PasswordListView extends VerticalLayout {
     public final static String PAGE_TITLE = "Lista haseł";
 
     private final SecurityConfiguration securityConfiguration;
+    private final DatabaseService databaseService;
     private final PasswordVerifier passwordVerifier;
 
     private final User user;
-
-    private final DatabaseService databaseService;
+    private Collection<Password> passwords;
 
     private final Grid<Password> passwordGrid = new Grid<>(Password.class);
 
@@ -61,11 +62,12 @@ public class PasswordListView extends VerticalLayout {
     }
 
     private void refreshGrid() {
-        passwordGrid.setItems(databaseService.getPasswords(user));
+        passwords = databaseService.getPasswords(user);
+        passwordGrid.setItems(passwords);
     }
 
     private void openAddPasswordDialog() {
-        AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration, passwordVerifier);
+        AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration, passwordVerifier, passwords);
         dialog.addListener(AddPasswordDialog.SavePasswordEvent.class, this::addPassword);
         dialog.open();
     }

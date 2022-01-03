@@ -36,18 +36,17 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         return new SecretKeySpec(key, keyAlgorithm);
     }
 
-    public String encrypt(String message, String password) throws Exception {
+    public String encrypt(String message, String password, byte[] iv) throws Exception {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[saltLength];
         random.nextBytes(salt);
 
         Cipher cipher = Cipher.getInstance(algorithm);
 
-        // TODO: GCMParameterSpec
+        GCMParameterSpec parameters = new GCMParameterSpec(tagLength, iv);
 
-        cipher.init(Cipher.ENCRYPT_MODE, generateKeySpec(password, salt));
+        cipher.init(Cipher.ENCRYPT_MODE, generateKeySpec(password, salt), parameters);
         byte[] encryptedMessage = cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
-        byte[] iv = cipher.getIV();
 
         byte[] cryptogram = new byte[ivLength + saltLength + encryptedMessage.length];
         System.arraycopy(iv, 0, cryptogram, 0, ivLength);
