@@ -1,5 +1,7 @@
 package pl.edu.pw.gardockt.passwordmanager.security.encryption;
 
+import pl.edu.pw.gardockt.passwordmanager.security.PasswordConfiguration;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
@@ -29,7 +31,7 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
     private static final int tagLength = 16 * 8;
 
     private static final int iterationCount = 65536;
-    private static final int maskingLength = 32;
+    private static final int maskingLength = PasswordConfiguration.MAX_LENGTH;
 
     private SecretKeySpec generateKeySpec(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength);
