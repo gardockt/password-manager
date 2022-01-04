@@ -22,10 +22,7 @@ import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
-import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
-import pl.edu.pw.gardockt.passwordmanager.security.PasswordVerifier;
-import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
-import pl.edu.pw.gardockt.passwordmanager.security.SimplePasswordStrengthCalculator;
+import pl.edu.pw.gardockt.passwordmanager.security.*;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
 
 import java.security.SecureRandom;
@@ -82,14 +79,19 @@ public class AddPasswordDialog extends Dialog {
         layout.setMinWidth("20em");
         add(layout);
 
-        // TODO: add password field validators
         binder.forField(descriptionField)
                 .withValidator(new StringLengthValidator(StringGenerator.getLengthError(1, 64), 1, 64))
                 .withValidator(text -> !text.isBlank(), Strings.BLANK_STRING_ERROR)
                 .bind(Password::getDescription, Password::setDescription);
-        binder.forField(passwordField.getPasswordField()).bind(Password::getPassword, Password::setPassword);
+        binder.forField(passwordField.getPasswordField())
+                .withValidator(new StringLengthValidator(
+                        StringGenerator.getLengthError(PasswordConfiguration.MIN_LENGTH, PasswordConfiguration.MAX_LENGTH),
+                        PasswordConfiguration.MIN_LENGTH,
+                        PasswordConfiguration.MAX_LENGTH
+                ))
+                .bind(Password::getPassword, Password::setPassword);
         binder.forField(repeatPasswordField)
-                .withValidator(text -> passwordField.getPasswordField().getValue().equals(text), Strings.PASSWORDS_NOT_MATCHING_ERROR)
+                .withValidator(text -> passwordField.getPasswordField().getValue().equals(text), Strings.PASSWORDS_NOT_MATCHING)
                 .bind(Password::getPassword, Password::setPassword);
         binder.bindInstanceFields(this);
     }

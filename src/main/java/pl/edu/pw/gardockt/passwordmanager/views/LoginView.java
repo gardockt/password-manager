@@ -9,6 +9,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.RegistrationDialog;
 import pl.edu.pw.gardockt.passwordmanager.services.RegistrationService;
@@ -22,7 +23,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final LoginForm loginForm = new LoginForm();
     private final Button registerButton = new Button(Strings.REGISTER);
 
-    public LoginView(RegistrationService registrationService) {
+    public LoginView(RegistrationService registrationService, UserDetailsService userDetailsService) {
         setSizeFull();
         setAlignItems(FlexComponent.Alignment.CENTER);
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
@@ -32,8 +33,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         loginForm.setAction("login");
         loginForm.setForgotPasswordButtonVisible(false);
 
-        //registerButton.addClickListener(e -> getUI().ifPresent(ui -> ui.getPage().setLocation("/register")));
-        registerButton.addClickListener(e -> new RegistrationDialog(registrationService).open());
+        registerButton.addClickListener(e -> new RegistrationDialog(registrationService, userDetailsService).open());
 
         add(loginForm, registerButton);
     }

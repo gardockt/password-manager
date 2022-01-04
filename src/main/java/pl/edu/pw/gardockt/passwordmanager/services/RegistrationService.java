@@ -2,6 +2,7 @@ package pl.edu.pw.gardockt.passwordmanager.services;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.edu.pw.gardockt.passwordmanager.entities.RegistrationData;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.entities.repositories.UserRepository;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
@@ -17,11 +18,11 @@ public class RegistrationService {
         this.passwordEncoder = securityConfiguration.getPasswordEncoder();
     }
 
-    public void register(String username, String accountPassword, String unlockPassword) {
+    public void register(RegistrationData registrationData) {
         userRepository.save(new User(
-                username,
-                passwordEncoder.encode(accountPassword),
-                passwordEncoder.encode(unlockPassword)
+                registrationData.getUsername(),
+                passwordEncoder.encode(registrationData.getAccountPassword()),
+                passwordEncoder.encode(registrationData.getUnlockPassword())
         ));
     }
 

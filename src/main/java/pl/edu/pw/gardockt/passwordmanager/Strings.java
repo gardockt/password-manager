@@ -23,7 +23,10 @@ public class Strings {
     public static final String PASSWORD_DESCRIPTION = "Opis";
 
     public static final String BLANK_STRING_ERROR = "wartość nie powinna być pusta";
-    public static final String PASSWORDS_NOT_MATCHING_ERROR = "podane hasła są różne";
+    public static final String PASSWORDS_NOT_MATCHING = "podane hasła są różne";
+    public static final String PASSWORD_TOO_WEAK = "hasło jest zbyt słabe";
+    public static final String USERNAME_TAKEN = "nazwa użytkownika jest zajęta";
+
     public static final String ILLEGAL_FIELD_VALUES_ERROR = "Nie wszystkie pola zostały poprawnie wypełnione";
     public static final String GENERIC_ERROR = "Wystąpił błąd";
     public static final String INCORRECT_UNLOCK_PASSWORD_ERROR = "Błędne hasło odblokowujące";

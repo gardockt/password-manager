@@ -9,8 +9,17 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.validator.StringLengthValidator;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
+import pl.edu.pw.gardockt.passwordmanager.entities.RegistrationData;
+import pl.edu.pw.gardockt.passwordmanager.security.PasswordConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.security.PasswordStrengthCalculator;
 import pl.edu.pw.gardockt.passwordmanager.security.SimplePasswordStrengthCalculator;
 import pl.edu.pw.gardockt.passwordmanager.services.RegistrationService;
@@ -18,6 +27,8 @@ import pl.edu.pw.gardockt.passwordmanager.services.RegistrationService;
 public class RegistrationDialog extends Dialog {
 
     private final RegistrationService registrationService;
+    private final UserDetailsService userDetailsService;
+
     private final PasswordStrengthCalculator calculator = new SimplePasswordStrengthCalculator();
 
     private final TextField usernameField = new TextField(Strings.USERNAME);
@@ -25,13 +36,17 @@ public class RegistrationDialog extends Dialog {
     private final PasswordField repeatAccountPasswordField = new PasswordField(Strings.REPEAT_ACCOUNT_PASSWORD);
     private final PasswordFieldWithStrength unlockPasswordField = new PasswordFieldWithStrength(calculator, Strings.UNLOCK_PASSWORD);
     private final PasswordField repeatUnlockPasswordField = new PasswordField(Strings.REPEAT_UNLOCK_PASSWORD);
-    private final Button registerButton = new Button(Strings.CONFIRM);
-    private final Button cancelButton = new Button(Strings.CANCEL);
+    private final Button registerButton = new Button(Strings.CONFIRM, e -> register());
+    private final Button cancelButton = new Button(Strings.CANCEL, e -> close());
 
     private final String width = "20em";
 
-    public RegistrationDialog(RegistrationService registrationService) {
+    private final RegistrationData registrationData = new RegistrationData();
+    private final Binder<RegistrationData> binder = new BeanValidationBinder<>(RegistrationData.class);
+
+    public RegistrationDialog(RegistrationService registrationService, UserDetailsService userDetailsService) {
         this.registrationService = registrationService;
+        this.userDetailsService = userDetailsService;
 
         configureComponents();
 
@@ -68,24 +83,59 @@ public class RegistrationDialog extends Dialog {
         unlockPasswordField.addClassName("py-s");
         repeatUnlockPasswordField.addClassName("py-s");
 
+        binder.forField(usernameField)
+                .withValidator(new StringLengthValidator(StringGenerator.getLengthError(4, 32), 4, 32))
+                .withValidator(this::isUsernameAvailable, Strings.USERNAME_TAKEN)
+                .bind(RegistrationData::getUsername, RegistrationData::setUsername);
+        binder.forField(accountPasswordField.getPasswordField())
+                .withValidator(new StringLengthValidator(
+                        StringGenerator.getLengthError(PasswordConfiguration.MIN_LENGTH, PasswordConfiguration.MAX_LENGTH),
+                        PasswordConfiguration.MIN_LENGTH,
+                        PasswordConfiguration.MAX_LENGTH
+                ))
+                .withValidator(pass -> accountPasswordField.getComplexityScore() >= 2, Strings.PASSWORD_TOO_WEAK)
+                .bind(RegistrationData::getAccountPassword, RegistrationData::setAccountPassword);
+        binder.forField(repeatAccountPasswordField)
+                .withValidator(pass -> accountPasswordField.getPasswordField().getValue().equals(pass), Strings.PASSWORDS_NOT_MATCHING)
+                .bind(RegistrationData::getAccountPassword, RegistrationData::setAccountPassword);
+        binder.forField(unlockPasswordField.getPasswordField())
+                .withValidator(new StringLengthValidator(
+                        StringGenerator.getLengthError(PasswordConfiguration.MIN_LENGTH, PasswordConfiguration.MAX_LENGTH),
+                        PasswordConfiguration.MIN_LENGTH,
+                        PasswordConfiguration.MAX_LENGTH
+                ))
+                .withValidator(pass -> unlockPasswordField.getComplexityScore() >= 2, Strings.PASSWORD_TOO_WEAK)
+                .bind(RegistrationData::getUnlockPassword, RegistrationData::setAccountPassword);
+        binder.forField(repeatUnlockPasswordField)
+                .withValidator(pass -> unlockPasswordField.getPasswordField().getValue().equals(pass), Strings.PASSWORDS_NOT_MATCHING)
+                .bind(RegistrationData::getUnlockPassword, RegistrationData::setUnlockPassword);
+        binder.bindInstanceFields(this);
+
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         registerButton.setWidthFull();
         cancelButton.setWidthFull();
+    }
 
-        // TODO: add validation
-
-        registerButton.addClickListener(e -> register());
-        cancelButton.addClickListener(e -> close());
+    private boolean isUsernameAvailable(String username) {
+        try {
+            userDetailsService.loadUserByUsername(username);
+            return false;
+        } catch (UsernameNotFoundException e) {
+            return true;
+        }
     }
 
     private void register() {
-        // TODO: add validation
+        // TODO: add validation?
 
         try {
-            registrationService.register(usernameField.getValue(), accountPasswordField.getPasswordField().getValue(), unlockPasswordField.getPasswordField().getValue());
+            binder.writeBean(registrationData);
+            registrationService.register(registrationData);
             Notification.show("Zarejestrowano pomyślnie");
             close();
+        } catch(ValidationException e) {
+            Notification.show(Strings.ILLEGAL_FIELD_VALUES_ERROR);
         } catch(Exception e) {
             Notification.show(Strings.ERROR_OCCURRED);
             e.printStackTrace();
