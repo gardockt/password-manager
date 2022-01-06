@@ -3,6 +3,7 @@ package pl.edu.pw.gardockt.passwordmanager.entities;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "users")
@@ -27,6 +28,11 @@ public class User {
     @NotBlank
     private String roles;
 
+    @NotNull
+    private Integer failedAttempts;
+
+    private Timestamp unlockDatetime;
+
     public User() {
     }
 
@@ -36,6 +42,7 @@ public class User {
         this.unlockPassword = unlockPassword;
         this.active = true;
         this.roles = "user";
+        this.failedAttempts = 0;
     }
 
     public Long getId() {
@@ -84,5 +91,21 @@ public class User {
 
     public void setRoles(String roles) {
         this.roles = roles;
+    }
+
+    public Integer getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = failedAttempts;
+    }
+
+    public Timestamp getUnlockDatetime() {
+        return unlockDatetime;
+    }
+
+    public void setUnlockDatetime(Timestamp unlockDatetime) {
+        this.unlockDatetime = unlockDatetime;
     }
 }

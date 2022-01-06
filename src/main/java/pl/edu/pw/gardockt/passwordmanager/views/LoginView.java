@@ -12,18 +12,20 @@ import com.vaadin.flow.router.Route;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.RegistrationDialog;
-import pl.edu.pw.gardockt.passwordmanager.services.RegistrationService;
+import pl.edu.pw.gardockt.passwordmanager.services.UserService;
 
 @Route("login")
 @PageTitle(LoginView.PAGE_TITLE)
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
+
+    // TODO: add custom message for locked account
 
     public static final String PAGE_TITLE = Strings.LOGIN;
 
     private final LoginForm loginForm = new LoginForm();
     private final Button registerButton = new Button(Strings.REGISTER);
 
-    public LoginView(RegistrationService registrationService, UserDetailsService userDetailsService) {
+    public LoginView(UserService userService, UserDetailsService userDetailsService) {
         setSizeFull();
         setAlignItems(FlexComponent.Alignment.CENTER);
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
@@ -33,7 +35,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         loginForm.setAction("login");
         loginForm.setForgotPasswordButtonVisible(false);
 
-        registerButton.addClickListener(e -> new RegistrationDialog(registrationService, userDetailsService).open());
+        registerButton.addClickListener(e -> new RegistrationDialog(userService, userDetailsService).open());
 
         add(loginForm, registerButton);
     }

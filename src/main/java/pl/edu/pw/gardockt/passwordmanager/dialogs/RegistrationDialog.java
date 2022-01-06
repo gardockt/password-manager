@@ -22,11 +22,11 @@ import pl.edu.pw.gardockt.passwordmanager.entities.RegistrationData;
 import pl.edu.pw.gardockt.passwordmanager.security.PasswordConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.security.PasswordStrengthCalculator;
 import pl.edu.pw.gardockt.passwordmanager.security.SimplePasswordStrengthCalculator;
-import pl.edu.pw.gardockt.passwordmanager.services.RegistrationService;
+import pl.edu.pw.gardockt.passwordmanager.services.UserService;
 
 public class RegistrationDialog extends Dialog {
 
-    private final RegistrationService registrationService;
+    private final UserService userService;
     private final UserDetailsService userDetailsService;
 
     private final PasswordStrengthCalculator calculator = new SimplePasswordStrengthCalculator();
@@ -44,8 +44,8 @@ public class RegistrationDialog extends Dialog {
     private final RegistrationData registrationData = new RegistrationData();
     private final Binder<RegistrationData> binder = new BeanValidationBinder<>(RegistrationData.class);
 
-    public RegistrationDialog(RegistrationService registrationService, UserDetailsService userDetailsService) {
-        this.registrationService = registrationService;
+    public RegistrationDialog(UserService userService, UserDetailsService userDetailsService) {
+        this.userService = userService;
         this.userDetailsService = userDetailsService;
 
         configureComponents();
@@ -131,7 +131,7 @@ public class RegistrationDialog extends Dialog {
 
         try {
             binder.writeBean(registrationData);
-            registrationService.register(registrationData);
+            userService.register(registrationData);
             Notification.show("Zarejestrowano pomyślnie");
             close();
         } catch(ValidationException e) {

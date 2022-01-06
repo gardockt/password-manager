@@ -42,7 +42,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // TODO: use lock here?
+        return true;
     }
 
     @Override

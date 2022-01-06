@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.AES256GCMEncryptionAlgorithm;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.services.UserService;
 import pl.edu.pw.gardockt.passwordmanager.views.LoginView;
 
 @EnableWebSecurity
@@ -22,9 +23,16 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     @Autowired
     UserDetailsService userDetailsService;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    UserService userService;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService);
+        auth.authenticationProvider(new CustomAuthenticationProvider(userDetailsService, passwordEncoder, userService));
     }
 
     @Override
