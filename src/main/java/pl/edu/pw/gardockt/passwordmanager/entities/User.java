@@ -29,7 +29,10 @@ public class User {
     private String roles;
 
     @NotNull
-    private Integer failedAttempts;
+    private Integer failedAttemptsSinceUnlock;
+
+    @NotNull
+    private Integer failedAttemptsSinceLogin;
 
     private Timestamp unlockDatetime;
 
@@ -42,7 +45,8 @@ public class User {
         this.unlockPassword = unlockPassword;
         this.active = true;
         this.roles = "user";
-        this.failedAttempts = 0;
+        this.failedAttemptsSinceUnlock = 0;
+        this.failedAttemptsSinceLogin = 0;
     }
 
     public Long getId() {
@@ -93,12 +97,20 @@ public class User {
         this.roles = roles;
     }
 
-    public Integer getFailedAttempts() {
-        return failedAttempts;
+    public Integer getFailedAttemptsSinceUnlock() {
+        return failedAttemptsSinceUnlock;
     }
 
-    public void setFailedAttempts(Integer failedAttempts) {
-        this.failedAttempts = failedAttempts;
+    public void setFailedAttemptsSinceUnlock(Integer failedAttemptsSinceUnlock) {
+        this.failedAttemptsSinceUnlock = failedAttemptsSinceUnlock;
+    }
+
+    public Integer getFailedAttemptsSinceLogin() {
+        return failedAttemptsSinceLogin;
+    }
+
+    public void setFailedAttemptsSinceLogin(Integer failedAttemptsSinceLogin) {
+        this.failedAttemptsSinceLogin = failedAttemptsSinceLogin;
     }
 
     public Timestamp getUnlockDatetime() {

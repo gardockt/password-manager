@@ -7,14 +7,15 @@ USE db;
 -- TODO: use asymmetric encryption with encrypted private key instead?
 
 CREATE TABLE users (
-    id                BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    username          VARCHAR(32)   NOT NULL UNIQUE,
-    account_password  CHAR(60)      NOT NULL,   -- bcrypt
-    unlock_password   CHAR(60)      NOT NULL,   -- bcrypt
-    roles             VARCHAR(64)   NOT NULL DEFAULT 'user',
-    active            BIT           NOT NULL DEFAULT TRUE,
-    failed_attempts   TINYINT       NOT NULL DEFAULT 0,
-    unlock_datetime   DATETIME      NULL
+    id                             BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    username                       VARCHAR(32)   NOT NULL UNIQUE,
+    account_password               CHAR(60)      NOT NULL,   -- bcrypt
+    unlock_password                CHAR(60)      NOT NULL,   -- bcrypt
+    roles                          VARCHAR(64)   NOT NULL DEFAULT 'user',
+    active                         BIT           NOT NULL DEFAULT TRUE,
+    failed_attempts_since_unlock   TINYINT       NOT NULL DEFAULT 0,
+    failed_attempts_since_login    INT           NOT NULL DEFAULT 0,
+    unlock_datetime                DATETIME      NULL
 );
 
 CREATE TABLE passwords (

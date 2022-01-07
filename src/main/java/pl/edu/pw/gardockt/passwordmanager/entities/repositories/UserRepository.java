@@ -14,12 +14,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-    @Query("UPDATE User u SET u.failedAttempts = u.failedAttempts + 1 WHERE u.username = :username AND u.failedAttempts < :failedAttemptsLockCount - 1")
+    @Query("UPDATE User u SET u.failedAttemptsSinceUnlock = u.failedAttemptsSinceUnlock + 1" +
+            " WHERE u.username = :username AND u.failedAttemptsSinceUnlock < :failedAttemptsLockCount - 1")
     @Modifying
     @Transactional
-    int incrementFailedAttempts(@Param("username") String username, @Param("failedAttemptsLockCount") Integer failedAttemptsLockCount);
+    int incrementFailedAttemptsSinceUnlock(@Param("username") String username, @Param("failedAttemptsLockCount") Integer failedAttemptsLockCount);
 
-    @Query("UPDATE User u SET u.failedAttempts = 0 WHERE u.username = :username")
+    @Query("UPDATE User u SET u.failedAttemptsSinceLogin = u.failedAttemptsSinceLogin + 1 WHERE u.username = :username AND u.unlockDatetime IS NULL")
+    @Modifying
+    @Transactional
+    void incrementFailedAttemptsSinceLogin(@Param("username") String username);
+
+    @Query("UPDATE User u SET u.failedAttemptsSinceUnlock = 0, u.failedAttemptsSinceLogin = 0 WHERE u.username = :username")
     @Modifying
     @Transactional
     void resetFailedAttempts(@Param("username") String username);
@@ -29,7 +35,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     void lock(@Param("username") String username, @Param("unlockDatetime") Timestamp unlockDatetime);
 
-    @Query("UPDATE User u SET u.unlockDatetime = NULL, u.failedAttempts = 0 WHERE u.username = :username")
+    @Query("UPDATE User u SET u.unlockDatetime = NULL, u.failedAttemptsSinceUnlock = 0 WHERE u.username = :username")
     @Modifying
     @Transactional
     void unlock(@Param("username") String username);

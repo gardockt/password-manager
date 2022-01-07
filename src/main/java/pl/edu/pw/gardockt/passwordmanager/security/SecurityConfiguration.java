@@ -29,6 +29,10 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     @Autowired
     UserService userService;
 
+    // TODO: move somewhere else?
+    public final int failedAttemptsLockCount = 10;
+    public final long lockTimeMillis = 5 * 60 * 1000;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService);

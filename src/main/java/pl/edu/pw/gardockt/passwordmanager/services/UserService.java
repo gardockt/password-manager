@@ -12,13 +12,12 @@ import java.sql.Timestamp;
 @Service
 public class UserService {
 
+    private final SecurityConfiguration securityConfiguration;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final int failedAttemptsLockCount = 10;
-    private final long lockTimeMillis = 5 * 60 * 1000;
-
     public UserService(SecurityConfiguration securityConfiguration, UserRepository userRepository) {
+        this.securityConfiguration = securityConfiguration;
         this.userRepository = userRepository;
         this.passwordEncoder = securityConfiguration.getPasswordEncoder();
     }
@@ -26,7 +25,8 @@ public class UserService {
     public void incrementFailedAttempts(String username) {
         // if no rows are updated, we hit the attempt limit
         // this function is called only after user is found, so we don't have to worry about no username found
-        if(userRepository.incrementFailedAttempts(username, failedAttemptsLockCount) == 0) {
+        userRepository.incrementFailedAttemptsSinceLogin(username);
+        if(userRepository.incrementFailedAttemptsSinceUnlock(username, securityConfiguration.failedAttemptsLockCount) == 0) {
             lock(username);
         }
     }
@@ -36,7 +36,7 @@ public class UserService {
     }
 
     public void lock(String username) {
-        userRepository.lock(username, new Timestamp(System.currentTimeMillis() + lockTimeMillis));
+        userRepository.lock(username, new Timestamp(System.currentTimeMillis() + securityConfiguration.lockTimeMillis));
     }
 
     public void unlock(String username) {

@@ -14,7 +14,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
@@ -121,7 +120,7 @@ public class RegistrationDialog extends Dialog {
         try {
             userDetailsService.loadUserByUsername(username);
             return false;
-        } catch (UsernameNotFoundException e) {
+        } catch (Exception e) {
             return true;
         }
     }

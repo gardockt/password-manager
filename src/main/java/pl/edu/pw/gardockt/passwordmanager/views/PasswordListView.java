@@ -9,6 +9,7 @@ import com.vaadin.flow.router.Route;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.AddPasswordDialog;
+import pl.edu.pw.gardockt.passwordmanager.dialogs.MessageDialog;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.UnlockPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
@@ -19,6 +20,8 @@ import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 
 import javax.annotation.security.PermitAll;
 import java.util.Collection;
+
+// TODO: add last failed login time
 
 @PageTitle(PasswordListView.PAGE_TITLE)
 @Route(value = "", layout = MainLayout.class)
@@ -43,6 +46,14 @@ public class PasswordListView extends VerticalLayout {
 
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userDetails.getUser();
+
+        // TODO: confirm no race condition happens on failed attempts read/reset
+        if(user.getFailedAttemptsSinceLogin() >= securityConfiguration.failedAttemptsLockCount) {
+            new MessageDialog(
+                    "Liczba nieudanych prób logowania od ostatniego poprawnego zalogowania: " + user.getFailedAttemptsSinceLogin(),
+                    "Ostrzeżenie"
+            ).open();
+        }
 
         setSizeFull();
 
