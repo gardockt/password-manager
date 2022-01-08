@@ -7,6 +7,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.security.core.context.SecurityContextHolder;
+import pl.edu.pw.gardockt.passwordmanager.ApplicationConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.AddPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.MessageDialog;
@@ -78,6 +79,11 @@ public class PasswordListView extends VerticalLayout {
     }
 
     private void openAddPasswordDialog() {
+        if(passwords.size() >= ApplicationConfiguration.MAX_STORED_PASSWORDS_COUNT) {
+            Notification.show("Osiągnięto maksymalną ilość haseł");
+            return;
+        }
+
         AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration, passwordVerifier, passwords);
         dialog.addListener(AddPasswordDialog.SavePasswordEvent.class, this::addPassword);
         dialog.open();

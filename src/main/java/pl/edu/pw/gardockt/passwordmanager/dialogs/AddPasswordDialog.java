@@ -31,8 +31,6 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-// TODO: add password count limit (1000?)
-
 public class AddPasswordDialog extends Dialog {
 
     // TODO: add password generation?
