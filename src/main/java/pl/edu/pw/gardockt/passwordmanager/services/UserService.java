@@ -23,6 +23,10 @@ public class UserService {
     }
 
     public void incrementFailedAttempts(String username) {
+        if(username == null) {
+            throw new IllegalArgumentException("Username is null");
+        }
+
         // if no rows are updated, we hit the attempt limit
         // this function is called only after user is found, so we don't have to worry about no username found
         userRepository.incrementFailedAttemptsSinceLogin(username);
@@ -32,22 +36,49 @@ public class UserService {
     }
 
     public void resetFailedAttempts(String username) {
+        if(username == null) {
+            throw new IllegalArgumentException("Username is null");
+        }
         userRepository.resetFailedAttempts(username);
     }
 
     public void lock(String username) {
+        if(username == null) {
+            throw new IllegalArgumentException("Username is null");
+        }
         userRepository.lock(username, new Timestamp(System.currentTimeMillis() + securityConfiguration.lockTimeMillis));
     }
 
     public void unlock(String username) {
+        if(username == null) {
+            throw new IllegalArgumentException("Username is null");
+        }
         userRepository.unlock(username);
     }
 
     public void register(RegistrationData registrationData) {
+        if(registrationData == null) {
+            throw new IllegalArgumentException("Registration data is null");
+        }
+
+        String username = registrationData.getUsername();
+        String accountPassword = registrationData.getAccountPassword();
+        String unlockPassword = registrationData.getUnlockPassword();
+
+        if(username == null) {
+            throw new IllegalArgumentException("Username is null");
+        }
+        if(accountPassword == null) {
+            throw new IllegalArgumentException("Account password is null");
+        }
+        if(unlockPassword == null) {
+            throw new IllegalArgumentException("Unlock password is null");
+        }
+
         userRepository.save(new User(
-                registrationData.getUsername(),
-                passwordEncoder.encode(registrationData.getAccountPassword()),
-                passwordEncoder.encode(registrationData.getUnlockPassword())
+            username,
+            passwordEncoder.encode(accountPassword),
+            passwordEncoder.encode(unlockPassword)
         ));
     }
 
