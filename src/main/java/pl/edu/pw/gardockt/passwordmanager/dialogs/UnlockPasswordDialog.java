@@ -1,5 +1,6 @@
 package pl.edu.pw.gardockt.passwordmanager.dialogs;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -23,7 +24,7 @@ public class UnlockPasswordDialog extends Dialog {
     private final Password password;
 
     private final PasswordField unlockPasswordField = new PasswordField();
-    private final Button confirmButton = new Button(Strings.CONFIRM, e -> unlock());
+    private final Button confirmButton = new Button(Strings.CONFIRM, e -> new UnlockThread(getUI().orElseThrow(), this).start());
     private final Button cancelButton = new Button(Strings.CANCEL, e -> close());
 
     public UnlockPasswordDialog(SecurityConfiguration securityConfiguration, Password password) {
@@ -54,20 +55,35 @@ public class UnlockPasswordDialog extends Dialog {
         add(layout);
     }
 
-    private void unlock() {
-        // TODO: count attempts (use PasswordVerifier?)
-        try {
-            String decryptedPassword = encryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
-            Password unlockedPassword = password.clone();
-            unlockedPassword.setPassword(decryptedPassword);
-            new PasswordDialog(unlockedPassword).open();
-            close();
-        } catch (AEADBadTagException e) {
-            Notification.show(Strings.INCORRECT_UNLOCK_PASSWORD_ERROR);
-        } catch (Exception e) {
-            Notification.show(Strings.GENERIC_ERROR);
-            e.printStackTrace();
+    private class UnlockThread extends Thread {
+
+        private final UI ui;
+        private final UnlockPasswordDialog unlockPasswordDialog;
+
+        public UnlockThread(UI ui, UnlockPasswordDialog unlockPasswordDialog) {
+            this.ui = ui;
+            this.unlockPasswordDialog = unlockPasswordDialog;
         }
+
+        @Override
+        public void run() {
+            // TODO: count attempts (use PasswordVerifier?)
+            try {
+                String decryptedPassword = encryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
+                Password unlockedPassword = password.clone();
+                unlockedPassword.setPassword(decryptedPassword);
+                ui.access(() -> {
+                    new PasswordDialog(unlockedPassword).open();
+                    unlockPasswordDialog.close();
+                });
+            } catch (AEADBadTagException e) {
+                ui.access(() -> Notification.show(Strings.INCORRECT_UNLOCK_PASSWORD_ERROR));
+            } catch (Exception e) {
+                ui.access(() -> Notification.show(Strings.GENERIC_ERROR));
+                e.printStackTrace();
+            }
+        }
+
     }
 
 }

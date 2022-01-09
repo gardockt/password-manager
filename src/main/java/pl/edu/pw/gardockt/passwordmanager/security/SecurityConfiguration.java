@@ -9,9 +9,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import pl.edu.pw.gardockt.passwordmanager.security.encryption.AES256GCMEncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.AES256GCMWithWaitEncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.BCryptWithWaitPasswordEncoder;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
 import pl.edu.pw.gardockt.passwordmanager.services.UserService;
 import pl.edu.pw.gardockt.passwordmanager.views.LoginView;
@@ -29,9 +29,10 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     @Autowired
     UserService userService;
 
-    // TODO: move somewhere else?
     public final int failedAttemptsLockCount = 10;
     public final long lockTimeMillis = 5 * 60 * 1000;
+    public final int authMinWaitTimeMillis = 100;
+    public final int authMaxWaitTimeMillis = 500;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -53,12 +54,12 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptWithWaitPasswordEncoder(this);
     }
 
     @Bean
     public EncryptionAlgorithm getEncryptionAlgorithm() {
-        return new AES256GCMEncryptionAlgorithm();
+        return new AES256GCMWithWaitEncryptionAlgorithm(this);
     }
 
 }

@@ -18,7 +18,6 @@ import java.util.Base64;
 public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
 
     // TODO: fix key/message containing dialects (result varying on locale)
-    // TODO: fix potential timing attack
     // TODO: change String to char[]?
 
     private static final String keyFactoryAlgorithm = "PBKDF2WithHmacSHA256";
