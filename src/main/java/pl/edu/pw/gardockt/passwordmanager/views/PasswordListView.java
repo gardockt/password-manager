@@ -48,7 +48,6 @@ public class PasswordListView extends VerticalLayout {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userDetails.getUser();
 
-        // TODO: confirm no race condition happens on failed attempts read/reset
         if(user.getFailedAttemptsSinceLogin() >= securityConfiguration.failedAttemptsLockCount) {
             new MessageDialog(
                     "Liczba nieudanych prób logowania od ostatniego poprawnego zalogowania: " + user.getFailedAttemptsSinceLogin(),

@@ -126,8 +126,6 @@ public class RegistrationDialog extends Dialog {
     }
 
     private void register() {
-        // TODO: add validation?
-
         try {
             binder.writeBean(registrationData);
             userService.register(registrationData);

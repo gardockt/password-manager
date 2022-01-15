@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 
 public class AddPasswordDialog extends Dialog {
 
-    // TODO: add password generation?
-
     private final PasswordVerifier passwordVerifier;
     private final EncryptionAlgorithm encryptionAlgorithm;
 
