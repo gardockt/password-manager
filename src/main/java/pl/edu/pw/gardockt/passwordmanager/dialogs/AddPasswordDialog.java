@@ -81,10 +81,8 @@ public class AddPasswordDialog extends Dialog {
                 .bind(Password::getDescription, Password::setDescription);
         binder.forField(passwordField.getPasswordField())
                 .withValidator(new StringLengthValidator(
-                        StringGenerator.getLengthError(PasswordConfiguration.MIN_LENGTH, PasswordConfiguration.MAX_LENGTH),
-                        PasswordConfiguration.MIN_LENGTH,
-                        PasswordConfiguration.MAX_LENGTH
-                ))
+                    StringGenerator.getLengthError(1, PasswordConfiguration.MAX_LENGTH),
+                    1, PasswordConfiguration.MAX_LENGTH))
                 .bind(Password::getPassword, Password::setPassword);
         binder.forField(repeatPasswordField)
                 .withValidator(text -> passwordField.getPasswordField().getValue().equals(text), Strings.PASSWORDS_NOT_MATCHING)
