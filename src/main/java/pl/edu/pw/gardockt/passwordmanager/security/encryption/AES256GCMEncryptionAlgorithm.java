@@ -17,8 +17,6 @@ import java.util.Base64;
 
 public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
 
-    // TODO: fix key/message containing dialects (result varying on locale)
-
     private static final String keyFactoryAlgorithm = "PBKDF2WithHmacSHA256";
     private static final String keyAlgorithm = "AES";
     private static final String algorithm = "AES/GCM/NoPadding";
@@ -29,7 +27,9 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
     private static final int tagLength = 16 * 8;
 
     private static final int iterationCount = 65536;
-    private static final int targetLength = PasswordConfiguration.MAX_LENGTH + 1;
+    private static final int maxLength = PasswordConfiguration.MAX_LENGTH * 4; // * 4 as characters can take up to 4 bytes
+
+    private static final SecureRandom random = new SecureRandom();
 
     private SecretKeySpec generateKeySpec(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength);
@@ -38,27 +38,24 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         return new SecretKeySpec(key, keyAlgorithm);
     }
 
-    // padding in order to hide password's length
+    // random null padding in order to hide password's length
 
     private byte[] padMessage(byte[] message) {
-        byte[] paddedMessage = Arrays.copyOf(message, targetLength);
-        int paddingLength = targetLength - message.length;
-        Arrays.fill(paddedMessage, message.length, targetLength, (byte) paddingLength);
-        return paddedMessage;
+        int targetPasswordLength = Math.max(message.length, random.nextInt(maxLength + 1));
+        return Arrays.copyOf(message, targetPasswordLength);
     }
 
     private byte[] unpadMessage(byte[] message) {
-        return Arrays.copyOf(message, targetLength - message[targetLength - 1]);
+        int passwordLength = message.length;
+        while(message[passwordLength - 1] == 0) {
+            passwordLength--;
+        }
+        return Arrays.copyOf(message, passwordLength);
     }
 
     public String encrypt(String message, String password, byte[] iv) throws Exception {
-        if(message.length() >= targetLength) {
-            throw new IllegalArgumentException("Message is too long");
-        }
-
         byte[] messageBytes = padMessage(message.getBytes(StandardCharsets.UTF_8));
 
-        SecureRandom random = new SecureRandom();
         byte[] salt = new byte[saltLength];
         random.nextBytes(salt);
 
