@@ -2,6 +2,7 @@ package pl.edu.pw.gardockt.passwordmanager.dialogs;
 
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -62,6 +63,9 @@ public class AddPasswordDialog extends Dialog {
 
         confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        confirmButton.addClickShortcut(Key.ENTER);
+        cancelButton.addClickShortcut(Key.ESCAPE);
 
         descriptionField.setWidthFull();
         passwordField.setWidthFull();

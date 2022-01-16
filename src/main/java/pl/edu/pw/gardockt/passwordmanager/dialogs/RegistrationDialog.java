@@ -1,5 +1,6 @@
 package pl.edu.pw.gardockt.passwordmanager.dialogs;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -112,8 +113,12 @@ public class RegistrationDialog extends Dialog {
 
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
         registerButton.setWidthFull();
         cancelButton.setWidthFull();
+
+        registerButton.addClickShortcut(Key.ENTER);
+        cancelButton.addClickShortcut(Key.ESCAPE);
     }
 
     private boolean isUsernameAvailable(String username) {

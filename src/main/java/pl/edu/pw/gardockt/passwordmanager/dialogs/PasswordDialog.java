@@ -1,5 +1,6 @@
 package pl.edu.pw.gardockt.passwordmanager.dialogs;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -23,6 +24,7 @@ public class PasswordDialog extends Dialog {
 
         closeButton.setWidthFull();
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        closeButton.addClickShortcut(Key.ESCAPE);
 
         H3 title = new H3(password.getDescription());
         title.addClassName("mt-0");

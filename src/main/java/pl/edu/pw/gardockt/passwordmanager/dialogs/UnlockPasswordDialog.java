@@ -1,5 +1,6 @@
 package pl.edu.pw.gardockt.passwordmanager.dialogs;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -36,6 +37,9 @@ public class UnlockPasswordDialog extends Dialog {
 
         confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        confirmButton.addClickShortcut(Key.ENTER);
+        cancelButton.addClickShortcut(Key.ESCAPE);
 
         unlockPasswordField.setWidthFull();
 

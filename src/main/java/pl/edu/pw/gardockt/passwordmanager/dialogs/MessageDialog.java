@@ -1,5 +1,6 @@
 package pl.edu.pw.gardockt.passwordmanager.dialogs;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -18,6 +19,8 @@ public class MessageDialog extends Dialog {
 
         Button closeButton = new Button(Strings.CLOSE, e -> close());
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        closeButton.addClickShortcut(Key.ENTER);
+        closeButton.addClickShortcut(Key.ESCAPE);
 
         add(new VerticalLayout(
                 titleObject,
