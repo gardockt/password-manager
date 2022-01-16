@@ -29,7 +29,7 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
     private static final int tagLength = 16 * 8;
 
     private static final int iterationCount = 65536;
-    private static final int maskingLength = PasswordConfiguration.MAX_LENGTH;
+    private static final int targetLength = PasswordConfiguration.MAX_LENGTH + 1;
 
     private SecretKeySpec generateKeySpec(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength);
@@ -38,13 +38,25 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         return new SecretKeySpec(key, keyAlgorithm);
     }
 
+    // padding in order to hide password's length
+
+    private byte[] padMessage(byte[] message) {
+        byte[] paddedMessage = Arrays.copyOf(message, targetLength);
+        int paddingLength = targetLength - message.length;
+        Arrays.fill(paddedMessage, message.length, targetLength, (byte) paddingLength);
+        return paddedMessage;
+    }
+
+    private byte[] unpadMessage(byte[] message) {
+        return Arrays.copyOf(message, targetLength - message[targetLength - 1]);
+    }
+
     public String encrypt(String message, String password, byte[] iv) throws Exception {
-        // add padding to hide message's length
-        if(message.length() < maskingLength) {
-            char[] masking = new char[maskingLength - message.length()];
-            Arrays.fill(masking, '\0');
-            message = message.concat(new String(masking));
+        if(message.length() >= targetLength) {
+            throw new IllegalArgumentException("Message is too long");
         }
+
+        byte[] messageBytes = padMessage(message.getBytes(StandardCharsets.UTF_8));
 
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[saltLength];
@@ -55,7 +67,7 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         GCMParameterSpec parameters = new GCMParameterSpec(tagLength, iv);
 
         cipher.init(Cipher.ENCRYPT_MODE, generateKeySpec(password, salt), parameters);
-        byte[] encryptedMessage = cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
+        byte[] encryptedMessage = cipher.doFinal(messageBytes);
 
         byte[] cryptogram = new byte[ivLength + saltLength + encryptedMessage.length];
         System.arraycopy(iv, 0, cryptogram, 0, ivLength);
@@ -82,12 +94,9 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
         cipher.init(Cipher.DECRYPT_MODE, generateKeySpec(password, salt), parameters);
         byte[] message = cipher.doFinal(encryptedMessage);
 
-        int newLength = message.length;
-        while(message[newLength - 1] == '\0') {
-            newLength--;
-        }
+        message = unpadMessage(message);
 
-        return new String(Arrays.copyOf(message, newLength));
+        return new String(message);
     }
 
 }
