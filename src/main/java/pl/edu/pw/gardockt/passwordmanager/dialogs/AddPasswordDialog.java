@@ -19,6 +19,7 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.shared.Registration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class AddPasswordDialog extends Dialog {
 
-    private final PasswordVerifier passwordVerifier;
+    private final PasswordEncoder passwordEncoder;
     private final EncryptionAlgorithm encryptionAlgorithm;
 
     private final Collection<Password> existingPasswords;
@@ -50,8 +51,8 @@ public class AddPasswordDialog extends Dialog {
 
     private final Password password = new Password();
 
-    public AddPasswordDialog(SecurityConfiguration securityConfiguration, PasswordVerifier passwordVerifier, Collection<Password> existingPasswords) {
-        this.passwordVerifier = passwordVerifier;
+    public AddPasswordDialog(SecurityConfiguration securityConfiguration, Collection<Password> existingPasswords) {
+        this.passwordEncoder = securityConfiguration.getPasswordEncoder();
         this.encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
         this.existingPasswords = existingPasswords;
 
@@ -101,7 +102,7 @@ public class AddPasswordDialog extends Dialog {
         try {
             binder.writeBean(password);
 
-            if (!passwordVerifier.verifyUnlockPassword(userDetails.getUser(), unlockPasswordField.getValue())) {
+            if (!passwordEncoder.matches(unlockPasswordField.getValue(), userDetails.getUser().getUnlockPassword())) {
                 throw new BadCredentialsException(Strings.INCORRECT_UNLOCK_PASSWORD_ERROR);
             }
 

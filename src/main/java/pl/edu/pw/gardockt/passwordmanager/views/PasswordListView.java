@@ -15,14 +15,11 @@ import pl.edu.pw.gardockt.passwordmanager.dialogs.UnlockPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
-import pl.edu.pw.gardockt.passwordmanager.security.PasswordVerifier;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 
 import javax.annotation.security.PermitAll;
 import java.util.Collection;
-
-// TODO: add last failed login time
 
 @PageTitle(PasswordListView.PAGE_TITLE)
 @Route(value = "", layout = MainLayout.class)
@@ -33,17 +30,15 @@ public class PasswordListView extends VerticalLayout {
 
     private final SecurityConfiguration securityConfiguration;
     private final DatabaseService databaseService;
-    private final PasswordVerifier passwordVerifier;
 
     private final User user;
     private Collection<Password> passwords;
 
     private final Grid<Password> passwordGrid = new Grid<>(Password.class);
 
-    public PasswordListView(SecurityConfiguration securityConfiguration, DatabaseService databaseService, PasswordVerifier passwordVerifier) {
+    public PasswordListView(SecurityConfiguration securityConfiguration, DatabaseService databaseService) {
         this.securityConfiguration = securityConfiguration;
         this.databaseService = databaseService;
-        this.passwordVerifier = passwordVerifier;
 
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userDetails.getUser();
@@ -83,7 +78,7 @@ public class PasswordListView extends VerticalLayout {
             return;
         }
 
-        AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration, passwordVerifier, passwords);
+        AddPasswordDialog dialog = new AddPasswordDialog(securityConfiguration, passwords);
         dialog.addListener(AddPasswordDialog.SavePasswordEvent.class, this::addPassword);
         dialog.open();
     }

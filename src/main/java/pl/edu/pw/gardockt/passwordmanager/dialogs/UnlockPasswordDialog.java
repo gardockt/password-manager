@@ -71,7 +71,6 @@ public class UnlockPasswordDialog extends Dialog {
 
         @Override
         public void run() {
-            // TODO: count attempts (use PasswordVerifier?)
             try {
                 String decryptedPassword = encryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
                 Password unlockedPassword = password.clone();
