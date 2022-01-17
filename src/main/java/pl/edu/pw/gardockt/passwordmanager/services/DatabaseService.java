@@ -8,6 +8,7 @@ import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.entities.repositories.PasswordRepository;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -33,6 +34,14 @@ public class DatabaseService {
         if(passwordRepository.getPasswordCountByUser(password.getUser()) > ApplicationConfiguration.MAX_STORED_PASSWORDS_COUNT) {
             throw new DataIntegrityViolationException("Max password count reached");
         }
+    }
+
+    public void updatePasswordLastAccess(Password password) {
+        if(password == null) {
+            throw new IllegalArgumentException("Password is null");
+        }
+
+        passwordRepository.updateLastAccess(password, new Timestamp(System.currentTimeMillis()));
     }
 
 }

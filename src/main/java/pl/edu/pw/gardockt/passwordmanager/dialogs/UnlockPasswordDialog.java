@@ -15,22 +15,28 @@ import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
+import pl.edu.pw.gardockt.passwordmanager.views.PasswordListView;
 
 import javax.crypto.AEADBadTagException;
 
 public class UnlockPasswordDialog extends Dialog {
 
-    EncryptionAlgorithm encryptionAlgorithm;
+    private final EncryptionAlgorithm encryptionAlgorithm;
+    private final DatabaseService databaseService;
 
     private final Password password;
 
     private final PasswordField unlockPasswordField = new PasswordField();
-    private final Button confirmButton = new Button(Strings.CONFIRM, e -> new UnlockThread(getUI().orElseThrow(), this).start());
+    private final Button confirmButton = new Button(Strings.CONFIRM);
     private final Button cancelButton = new Button(Strings.CANCEL, e -> close());
 
-    public UnlockPasswordDialog(SecurityConfiguration securityConfiguration, Password password) {
+    public UnlockPasswordDialog(SecurityConfiguration securityConfiguration, DatabaseService databaseService, Password password, PasswordListView passwordListView) {
         this.encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
+        this.databaseService = databaseService;
         this.password = password;
+
+        confirmButton.addClickListener(e -> new UnlockThread(getUI().orElseThrow(), this, passwordListView).start());
 
         confirmButton.setWidthFull();
         cancelButton.setWidthFull();
@@ -63,20 +69,26 @@ public class UnlockPasswordDialog extends Dialog {
 
         private final UI ui;
         private final UnlockPasswordDialog unlockPasswordDialog;
+        private final PasswordListView passwordListView;
 
-        public UnlockThread(UI ui, UnlockPasswordDialog unlockPasswordDialog) {
+        public UnlockThread(UI ui, UnlockPasswordDialog unlockPasswordDialog, PasswordListView passwordListView) {
             this.ui = ui;
             this.unlockPasswordDialog = unlockPasswordDialog;
+            this.passwordListView = passwordListView;
         }
 
         @Override
         public void run() {
             try {
                 String decryptedPassword = encryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
+
+                // password unlocked successfully
+                databaseService.updatePasswordLastAccess(password);
                 Password unlockedPassword = password.clone();
                 unlockedPassword.setPassword(decryptedPassword);
                 ui.access(() -> {
                     new PasswordDialog(unlockedPassword).open();
+                    passwordListView.refreshGrid();
                     unlockPasswordDialog.close();
                 });
             } catch (AEADBadTagException e) {

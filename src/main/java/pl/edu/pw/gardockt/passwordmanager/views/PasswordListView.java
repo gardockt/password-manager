@@ -8,6 +8,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.edu.pw.gardockt.passwordmanager.ApplicationConfiguration;
+import pl.edu.pw.gardockt.passwordmanager.Formatter;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.AddPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.MessageDialog;
@@ -19,6 +20,7 @@ import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 
 import javax.annotation.security.PermitAll;
+import java.sql.Timestamp;
 import java.util.Collection;
 
 @PageTitle(PasswordListView.PAGE_TITLE)
@@ -55,10 +57,21 @@ public class PasswordListView extends VerticalLayout {
         passwordGrid.setSizeFull();
         passwordGrid.removeAllColumns();
         passwordGrid.addColumn("description").setHeader("Opis");
-        //passwordGrid.getColumns().forEach(col -> col.setAutoWidth(true));
+        passwordGrid.addColumn(password -> Formatter.formatDate(password.getLastAccess()))
+            .setComparator((pa, pb) -> {
+                Timestamp ta = pa.getLastAccess();
+                Timestamp tb = pb.getLastAccess();
+                if(ta != null && tb != null) {
+                    return ta.compareTo(tb);
+                } else {
+                    return (ta != null ? 1 : 0) - (tb != null ? 1 : 0);
+                }
+            })
+            .setHeader("Ostatni dostęp");
+        passwordGrid.getColumns().forEach(col -> col.setAutoWidth(true));
         passwordGrid.asSingleSelect().addValueChangeListener(e -> {
             if(e.getValue() != null) {
-                new UnlockPasswordDialog(securityConfiguration, e.getValue()).open();
+                new UnlockPasswordDialog(securityConfiguration, databaseService, e.getValue(), this).open();
                 passwordGrid.asSingleSelect().setValue(null);
             }
         });
@@ -67,7 +80,7 @@ public class PasswordListView extends VerticalLayout {
         add(new Button(Strings.ADD_PASSWORD, e -> openAddPasswordDialog()), passwordGrid);
     }
 
-    private void refreshGrid() {
+    public void refreshGrid() {
         passwords = databaseService.getPasswords(user);
         passwordGrid.setItems(passwords);
     }

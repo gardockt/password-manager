@@ -3,6 +3,7 @@ package pl.edu.pw.gardockt.passwordmanager.entities;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "passwords")
@@ -23,6 +24,8 @@ public class Password {
     @NotBlank
     private String description;
 
+    private Timestamp lastAccess;
+
     public Password() {
     }
 
@@ -31,6 +34,7 @@ public class Password {
         this.user = user;
         this.password = password;
         this.description = description;
+        this.lastAccess = null;
     }
 
     public Long getId() {
@@ -63,6 +67,14 @@ public class Password {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Timestamp getLastAccess() {
+        return lastAccess;
+    }
+
+    public void setLastAccess(Timestamp lastAccess) {
+        this.lastAccess = lastAccess;
     }
 
     public Password clone() {
