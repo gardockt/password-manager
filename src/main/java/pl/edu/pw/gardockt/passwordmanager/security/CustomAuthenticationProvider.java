@@ -9,18 +9,26 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 import pl.edu.pw.gardockt.passwordmanager.services.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 
 public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
 
     private final UserService userService;
+    private final DatabaseService databaseService;
 
-    public CustomAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, UserService userService) {
+    private final HttpServletRequest request;
+
+    public CustomAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, UserService userService, DatabaseService databaseService, HttpServletRequest request) {
         setUserDetailsService(userDetailsService);
         setPasswordEncoder(passwordEncoder);
         this.userService = userService;
+        this.databaseService = databaseService;
+        this.request = request;
     }
 
     @Override
@@ -53,7 +61,9 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
 
     @Override
     protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
+        WebAuthenticationDetails webAuthenticationDetails = (WebAuthenticationDetails) authentication.getDetails();
         userService.resetFailedAttempts(user.getUsername());
+        databaseService.addLoginHistory(((CustomUserDetails)user).getUser(), webAuthenticationDetails.getRemoteAddress(), request.getHeader("User-Agent"));
         return super.createSuccessAuthentication(principal, authentication, user);
     }
 

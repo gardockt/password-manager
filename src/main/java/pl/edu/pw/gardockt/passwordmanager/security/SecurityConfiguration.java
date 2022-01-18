@@ -13,21 +13,30 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.AES256GCMWithWaitEncryptionAlgorithm;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.BCryptWithWaitPasswordEncoder;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 import pl.edu.pw.gardockt.passwordmanager.services.UserService;
 import pl.edu.pw.gardockt.passwordmanager.views.LoginView;
+
+import javax.servlet.http.HttpServletRequest;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 
     @Autowired
-    UserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
+
+    @Autowired
+    private DatabaseService databaseService;
+
+    @Autowired
+    private HttpServletRequest request;
 
     public final int failedAttemptsLockCount = 10;
     public final long lockTimeMillis = 5 * 60 * 1000;
@@ -37,7 +46,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService);
-        auth.authenticationProvider(new CustomAuthenticationProvider(userDetailsService, passwordEncoder, userService));
+        auth.authenticationProvider(new CustomAuthenticationProvider(userDetailsService, passwordEncoder, userService, databaseService, request));
     }
 
     @Override
