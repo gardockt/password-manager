@@ -10,6 +10,7 @@ import pl.edu.pw.gardockt.passwordmanager.entities.UserAgent;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.util.List;
 
 public interface LoginHistoryRepository extends JpaRepository<LoginHistory, Long> {
 
@@ -19,5 +20,8 @@ public interface LoginHistoryRepository extends JpaRepository<LoginHistory, Long
 	@Transactional
 	int incrementLoginCount(@Param("user") User user, @Param("ip") String ip,
 							@Param("userAgent") UserAgent userAgent, @Param("lastAccess") Timestamp lastAccess);
+
+	@Query("SELECT lh FROM LoginHistory lh WHERE lh.user = :user ORDER BY lh.lastAccess DESC")
+	List<LoginHistory> getByUser(@Param("user") User user);
 
 }

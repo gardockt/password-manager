@@ -73,4 +73,12 @@ public class DatabaseService {
         }
     }
 
+    public List<LoginHistory> getLoginHistoryByUser(User user) {
+        if(user == null) {
+            throw new IllegalArgumentException("User is null");
+        }
+
+        return loginHistoryRepository.getByUser(user);
+    }
+
 }

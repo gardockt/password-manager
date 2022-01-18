@@ -105,8 +105,8 @@ public class MainLayout extends AppLayout {
 
     private List<RouterLink> createLinks() {
         MenuItemInfo[] menuItems = new MenuItemInfo[]{ //
-                new MenuItemInfo(PasswordListView.PAGE_TITLE, "la la-file", PasswordListView.class),
-
+            new MenuItemInfo(PasswordListView.PAGE_TITLE, "la la-file", PasswordListView.class),
+            new MenuItemInfo(LoginHistoryView.PAGE_TITLE, "la la-file", LoginHistoryView.class),
         };
         List<RouterLink> links = new ArrayList<>();
         for (MenuItemInfo menuItemInfo : menuItems) {

@@ -36,4 +36,9 @@ public class UserAgent {
 	public void setUserAgent(String userAgent) {
 		this.userAgent = userAgent;
 	}
+
+	@Override
+	public String toString() {
+		return userAgent;
+	}
 }
