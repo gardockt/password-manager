@@ -18,6 +18,8 @@ public class Password {
     @NotNull
     private User user;
 
+    private String username;
+
     @NotBlank
     private String password;
 
@@ -37,6 +39,15 @@ public class Password {
         this.lastAccess = null;
     }
 
+    public Password(Long id, User user, String username, String password, String description, Timestamp lastAccess) {
+        this.id = id;
+        this.user = user;
+        this.username = username;
+        this.password = password;
+        this.description = description;
+        this.lastAccess = lastAccess;
+    }
+
     public Long getId() {
         return id;
     }
@@ -51,6 +62,14 @@ public class Password {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
@@ -81,7 +100,7 @@ public class Password {
         try {
             return (Password) super.clone();
         } catch(CloneNotSupportedException e) {
-            return new Password(id, user, password, description);
+            return new Password(id, user, username, password, description, lastAccess);
         }
     }
 

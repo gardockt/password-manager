@@ -6,4 +6,8 @@ public class StringGenerator {
         return "wartość powinna mieć długość " + minLength + "-" + maxLength + " znaków";
     }
 
+    public static String getMaxLengthError(int maxLength) {
+        return "wartość powinna mieć długość co najwyżej " + maxLength + " znaków";
+    }
+
 }

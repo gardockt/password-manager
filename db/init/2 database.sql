@@ -13,12 +13,13 @@ CREATE TABLE users (
     active                         BIT           NOT NULL DEFAULT TRUE,
     failed_attempts_since_unlock   TINYINT       NOT NULL DEFAULT 0,
     failed_attempts_since_login    INT           NOT NULL DEFAULT 0,
-    unlock_datetime                DATETIME      NULL
+    unlock_datetime                DATETIME
 );
 
 CREATE TABLE passwords (
     id           BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id      BIGINT       NOT NULL,
+    username     VARCHAR(64),
     password     VARCHAR(500) NOT NULL,   -- AES-256-GCM
     description  VARCHAR(64)  NOT NULL UNIQUE,
     last_access  DATETIME,

@@ -41,6 +41,7 @@ public class AddPasswordDialog extends Dialog {
     private final Collection<Password> existingPasswords;
 
     private final TextField descriptionField = new TextField(Strings.PASSWORD_DESCRIPTION);
+    private final TextField usernameField = new TextField(Strings.USERNAME);
     private final PasswordFieldWithStrength passwordField = new PasswordFieldWithStrength(new SimplePasswordStrengthCalculator(), Strings.ACCOUNT_PASSWORD);
     private final PasswordField repeatPasswordField = new PasswordField(Strings.REPEAT_ACCOUNT_PASSWORD);
     private final PasswordField unlockPasswordField = new PasswordField(Strings.UNLOCK_PASSWORD);
@@ -69,6 +70,7 @@ public class AddPasswordDialog extends Dialog {
         cancelButton.addClickShortcut(Key.ESCAPE);
 
         descriptionField.setWidthFull();
+        usernameField.setWidthFull();
         passwordField.setWidthFull();
         repeatPasswordField.setWidthFull();
         unlockPasswordField.setWidthFull();
@@ -76,7 +78,7 @@ public class AddPasswordDialog extends Dialog {
         HorizontalLayout buttonLayout = new HorizontalLayout(confirmButton, cancelButton);
         buttonLayout.setWidthFull();
 
-        VerticalLayout layout = new VerticalLayout(title, descriptionField, passwordField, repeatPasswordField, unlockPasswordField, buttonLayout);
+        VerticalLayout layout = new VerticalLayout(title, descriptionField, usernameField, passwordField, repeatPasswordField, unlockPasswordField, buttonLayout);
         layout.setMinWidth("20em");
         add(layout);
 
@@ -85,6 +87,9 @@ public class AddPasswordDialog extends Dialog {
                 .withValidator(text -> !text.isBlank(), Strings.BLANK_STRING_ERROR)
                 .withValidator(text -> existingPasswords.stream().noneMatch(password -> password.getDescription().equals(text)), Strings.VALUE_MUST_BE_UNIQUE)
                 .bind(Password::getDescription, Password::setDescription);
+        binder.forField(usernameField)
+                    .withValidator(new StringLengthValidator(StringGenerator.getMaxLengthError(64), 0, 64))
+                    .bind(Password::getUsername, Password::setUsername);
         binder.forField(passwordField.getPasswordField())
                 .withValidator(new StringLengthValidator(
                     StringGenerator.getLengthError(1, PasswordConfiguration.MAX_LENGTH),
