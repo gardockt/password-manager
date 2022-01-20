@@ -13,8 +13,6 @@ import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 
 public class PasswordDialog extends Dialog {
 
-    // TODO: copy to clipboard
-
     private final PasswordField passwordField = new PasswordField(Strings.ACCOUNT_PASSWORD);
     private final Button closeButton = new Button(Strings.CLOSE, e -> close());
 

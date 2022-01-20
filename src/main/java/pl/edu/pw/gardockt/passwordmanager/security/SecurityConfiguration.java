@@ -51,9 +51,17 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        super.configure(http);
         setLoginView(http, LoginView.class);
-        http.requiresChannel().anyRequest().requiresSecure();
+        http
+            .authorizeRequests()
+                .antMatchers("/login").permitAll()
+                .and()
+            .requiresChannel()
+                .anyRequest().requiresSecure()
+                .and()
+            .formLogin()
+                .failureHandler(new CustomAuthenticationFailureHandler());
+        super.configure(http);
     }
 
     @Override

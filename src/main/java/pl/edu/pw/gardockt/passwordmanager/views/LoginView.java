@@ -18,12 +18,17 @@ import pl.edu.pw.gardockt.passwordmanager.services.UserService;
 @PageTitle(LoginView.PAGE_TITLE)
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
-    // TODO: add custom message for locked account
+    private enum ErrorType {
+        INVALID_CREDENTIALS,
+        ACCOUNT_LOCKED
+    }
 
     public static final String PAGE_TITLE = Strings.LOGIN;
 
     private final LoginForm loginForm = new LoginForm();
     private final Button registerButton = new Button(Strings.REGISTER);
+
+    private final LoginI18n loginI18n = LoginI18n.createDefault();
 
     public LoginView(UserService userService, UserDetailsService userDetailsService) {
         setSizeFull();
@@ -41,13 +46,6 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     }
 
     private void setLoginOverlayStrings() {
-        LoginI18n loginI18n = LoginI18n.createDefault();
-
-        LoginI18n.ErrorMessage errorMessage = new LoginI18n.ErrorMessage();
-        errorMessage.setTitle("Nieprawidłowa nazwa użytkownika lub hasło");
-        errorMessage.setMessage("Sprawdź poprawność wprowadzanych danych i spróbuj ponownie");
-        loginI18n.setErrorMessage(errorMessage);
-
         LoginI18n.Header header = new LoginI18n.Header();
         header.setTitle(Strings.APP_TITLE);
         header.setDescription("Zaloguj się, aby kontynuować");
@@ -63,10 +61,30 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         loginForm.setI18n(loginI18n);
     }
 
+    private void setLoginError(ErrorType errorType) {
+        LoginI18n.ErrorMessage errorMessage = new LoginI18n.ErrorMessage();
+        switch(errorType) {
+            case INVALID_CREDENTIALS:
+                errorMessage.setTitle("Nieprawidłowa nazwa użytkownika lub hasło");
+                errorMessage.setMessage("Sprawdź poprawność wprowadzanych danych i spróbuj ponownie");
+                break;
+            case ACCOUNT_LOCKED:
+                errorMessage.setTitle("Konto tymczasowo zablokowane");
+                errorMessage.setMessage("Spróbuj ponownie później");
+                break;
+        }
+        loginI18n.setErrorMessage(errorMessage);
+        loginForm.setError(true);
+        loginForm.setI18n(loginI18n);
+    }
+
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        if(beforeEnterEvent.getLocation().getQueryParameters().getParameters().containsKey("error")) {
-            loginForm.setError(true);
+        var parameters = beforeEnterEvent.getLocation().getQueryParameters().getParameters();
+        if(parameters.containsKey("error")) {
+            setLoginError(ErrorType.INVALID_CREDENTIALS);
+        } else if(parameters.containsKey("locked")) {
+            setLoginError(ErrorType.ACCOUNT_LOCKED);
         }
     }
 
