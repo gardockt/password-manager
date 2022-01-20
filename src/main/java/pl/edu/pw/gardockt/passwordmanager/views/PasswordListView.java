@@ -50,6 +50,7 @@ public class PasswordListView extends VerticalLayout {
                     "Liczba nieudanych prób logowania od ostatniego poprawnego zalogowania: " + user.getFailedAttemptsSinceLogin(),
                     "Ostrzeżenie"
             ).open();
+            user.setFailedAttemptsSinceLogin(0);
         }
 
         setSizeFull();
