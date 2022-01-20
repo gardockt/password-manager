@@ -1,8 +1,6 @@
 package pl.edu.pw.gardockt.passwordmanager.security;
 
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -38,7 +36,7 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
         try {
             customUserDetails = (CustomUserDetails) userDetails;
         } catch (ClassCastException e) {
-            throw new AuthenticationServiceException("Invalid user details class");
+            throw new InternalAuthenticationServiceException("Invalid user details class");
         }
 
         Timestamp unlockDatetime = customUserDetails.getUser().getUnlockDatetime();
@@ -49,6 +47,11 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
             } else { // lock is on, deny authentication
                 throw new LockedException("Account is locked due to too many failed attempts");
             }
+        }
+
+        // prevent clients without User-Agent
+        if(request.getHeader("User-Agent") == null) {
+            throw new AccountStatusException("User-Agent not found") {};
         }
 
         try {
