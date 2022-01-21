@@ -11,10 +11,13 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
+import org.springframework.security.core.context.SecurityContextHolder;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
+import pl.edu.pw.gardockt.passwordmanager.security.CustomUserDetails;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionPasswordGenerator;
 import pl.edu.pw.gardockt.passwordmanager.services.DatabaseService;
 import pl.edu.pw.gardockt.passwordmanager.views.PasswordListView;
 
@@ -36,7 +39,9 @@ public class UnlockPasswordDialog extends Dialog {
         this.databaseService = databaseService;
         this.password = password;
 
-        confirmButton.addClickListener(e -> new UnlockThread(getUI().orElseThrow(), this, passwordListView).start());
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        confirmButton.addClickListener(e -> new UnlockThread(getUI().orElseThrow(), this, passwordListView, userDetails.getUsername()).start());
 
         confirmButton.setWidthFull();
         cancelButton.setWidthFull();
@@ -70,17 +75,22 @@ public class UnlockPasswordDialog extends Dialog {
         private final UI ui;
         private final UnlockPasswordDialog unlockPasswordDialog;
         private final PasswordListView passwordListView;
+        private final String username;
 
-        public UnlockThread(UI ui, UnlockPasswordDialog unlockPasswordDialog, PasswordListView passwordListView) {
+        public UnlockThread(UI ui, UnlockPasswordDialog unlockPasswordDialog, PasswordListView passwordListView, String username) {
             this.ui = ui;
             this.unlockPasswordDialog = unlockPasswordDialog;
             this.passwordListView = passwordListView;
+            this.username = username;
         }
 
         @Override
         public void run() {
             try {
-                String decryptedPassword = encryptionAlgorithm.decrypt(password.getPassword(), unlockPasswordField.getValue());
+                String decryptedPassword = encryptionAlgorithm.decrypt(
+                    password.getPassword(),
+                    EncryptionPasswordGenerator.generate(unlockPasswordField.getValue(), username)
+                );
 
                 // password unlocked successfully
                 databaseService.updatePasswordLastAccess(password);

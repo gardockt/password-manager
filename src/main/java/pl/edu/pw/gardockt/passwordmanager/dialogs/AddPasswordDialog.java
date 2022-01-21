@@ -26,6 +26,7 @@ import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.security.*;
 import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionAlgorithm;
+import pl.edu.pw.gardockt.passwordmanager.security.encryption.EncryptionPasswordGenerator;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -111,7 +112,11 @@ public class AddPasswordDialog extends Dialog {
                 throw new BadCredentialsException(Strings.INCORRECT_UNLOCK_PASSWORD_ERROR);
             }
 
-            password.setPassword(encryptionAlgorithm.encrypt(password.getPassword(), unlockPasswordField.getValue(), generateUniqueIV()));
+            password.setPassword(encryptionAlgorithm.encrypt(
+                password.getPassword(),
+                EncryptionPasswordGenerator.generate(unlockPasswordField.getValue(), userDetails.getUsername()),
+                generateUniqueIV())
+            );
             password.setUser(userDetails.getUser());
             fireEvent(new SavePasswordEvent(this, password));
             close();
