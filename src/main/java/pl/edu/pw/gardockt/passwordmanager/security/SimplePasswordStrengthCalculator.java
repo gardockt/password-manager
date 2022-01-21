@@ -1,38 +1,23 @@
 package pl.edu.pw.gardockt.passwordmanager.security;
 
+import java.util.Arrays;
+import java.util.regex.Pattern;
+
 public class SimplePasswordStrengthCalculator implements PasswordStrengthCalculator {
 
+    private final Pattern lowercaseLetters = Pattern.compile(".*[a-z].*");
+    private final Pattern uppercaseLetters = Pattern.compile(".*[A-Z].*");
+    private final Pattern digits = Pattern.compile(".*[0-9].*");
+    private final Pattern specialCharacters = Pattern.compile(".*[^a-zA-Z0-9].*");
+
     public int getPasswordStrength(String password) {
-        int uniqueGroups = 0;
+        Pattern[] patterns = {lowercaseLetters, uppercaseLetters, digits, specialCharacters};
+        int uniqueGroups = (int) Arrays.stream(patterns).filter(p -> p.matcher(password).matches()).count();
         int passwordLength = password.length();
         long uniqueCharacterCount = password.chars().distinct().count();
 
-        if(password.matches(".*[a-z].*")) { // lowercase letters
-            uniqueGroups++;
-        }
-        if(password.matches(".*[A-Z].*")) { // uppercase letters
-            uniqueGroups++;
-        }
-        if(password.matches(".*[0-9].*")) { // digits
-            uniqueGroups++;
-        }
-        if(password.matches(".*[^a-zA-Z0-9].*")) { // special characters
-            uniqueGroups++;
-        }
-
         int score = (int) Math.round(((double)passwordLength / 3) + ((double)uniqueCharacterCount / 3) + (uniqueGroups * 3));
-
-        if (score < 10) {
-            return 0;
-        } else if (score < 15) {
-            return 1;
-        } else if (score < 20) {
-            return 2;
-        } else if (score < 25) {
-            return 3;
-        } else {
-            return 4;
-        }
+        return Math.min(Math.max(0, score / 5 - 1), 4);
     }
 
     public int getMinStrength() {
