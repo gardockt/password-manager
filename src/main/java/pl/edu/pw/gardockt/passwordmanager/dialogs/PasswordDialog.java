@@ -8,6 +8,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 
@@ -17,7 +18,17 @@ public class PasswordDialog extends Dialog {
     private final Button closeButton = new Button(Strings.CLOSE, e -> close());
 
     public PasswordDialog(Password password) {
+        if(password == null) {
+            throw new IllegalArgumentException();
+        }
+
         boolean includeUsername = (password.getUsername() != null && !password.getUsername().isBlank());
+
+        if((password.getPassword() == null || !RegexCheck.containsOnlyLegalCharacters(password.getPassword())) ||
+           (includeUsername && !RegexCheck.containsOnlyLegalCharacters(password.getUsername())) ||
+           (password.getDescription() == null || !RegexCheck.containsOnlyLegalCharacters(password.getDescription()))) {
+            throw new IllegalArgumentException();
+        }
 
         passwordField.setWidthFull();
         passwordField.setReadOnly(true);

@@ -15,6 +15,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
@@ -85,6 +86,7 @@ public class RegistrationDialog extends Dialog {
 
         binder.forField(usernameField)
                 .withValidator(new StringLengthValidator(StringGenerator.getLengthError(4, 32), 4, 32))
+                .withValidator(RegexCheck::isValidUsername, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .withValidator(this::isUsernameAvailable, Strings.USERNAME_TAKEN)
                 .bind(RegistrationData::getUsername, RegistrationData::setUsername);
         binder.forField(accountPasswordField.getPasswordField())
@@ -94,9 +96,11 @@ public class RegistrationDialog extends Dialog {
                         PasswordConfiguration.MAX_LENGTH
                 ))
                 .withValidator(pass -> accountPasswordField.getComplexityScore() >= 2, Strings.PASSWORD_TOO_WEAK)
+                .withValidator(RegexCheck::isValidPassword, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .bind(RegistrationData::getAccountPassword, RegistrationData::setAccountPassword);
         binder.forField(repeatAccountPasswordField)
                 .withValidator(pass -> accountPasswordField.getPasswordField().getValue().equals(pass), Strings.PASSWORDS_NOT_MATCHING)
+                .withValidator(RegexCheck::isValidPassword, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .bind(RegistrationData::getAccountPassword, RegistrationData::setAccountPassword);
         binder.forField(unlockPasswordField.getPasswordField())
                 .withValidator(new StringLengthValidator(
@@ -105,9 +109,11 @@ public class RegistrationDialog extends Dialog {
                         PasswordConfiguration.MAX_LENGTH
                 ))
                 .withValidator(pass -> unlockPasswordField.getComplexityScore() >= 2, Strings.PASSWORD_TOO_WEAK)
+                .withValidator(RegexCheck::isValidPassword, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .bind(RegistrationData::getUnlockPassword, RegistrationData::setAccountPassword);
         binder.forField(repeatUnlockPasswordField)
                 .withValidator(pass -> unlockPasswordField.getPasswordField().getValue().equals(pass), Strings.PASSWORDS_NOT_MATCHING)
+                .withValidator(RegexCheck::isValidPassword, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .bind(RegistrationData::getUnlockPassword, RegistrationData::setUnlockPassword);
         binder.bindInstanceFields(this);
 

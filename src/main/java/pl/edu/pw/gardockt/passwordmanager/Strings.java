@@ -27,6 +27,7 @@ public class Strings {
     public static final String PASSWORD_TOO_WEAK = "hasło jest zbyt słabe";
     public static final String USERNAME_TAKEN = "nazwa użytkownika jest zajęta";
     public static final String VALUE_MUST_BE_UNIQUE = "wartość musi być unikalna";
+    public static final String VALUE_CONTAINS_ILLEGAL_CHARACTERS = "wartość zawiera niedozwolone znaki";
 
     public static final String ILLEGAL_FIELD_VALUES_ERROR = "Nie wszystkie pola zostały poprawnie wypełnione";
     public static final String GENERIC_ERROR = "Wystąpił błąd";

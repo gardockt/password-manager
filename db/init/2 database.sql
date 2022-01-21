@@ -1,8 +1,6 @@
 CREATE DATABASE db;
 USE db;
 
--- TODO: disallow unicode characters for ALL fields?
-
 CREATE TABLE users (
     id                             BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username                       VARCHAR(32)   NOT NULL UNIQUE,

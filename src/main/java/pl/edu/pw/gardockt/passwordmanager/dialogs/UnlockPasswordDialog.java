@@ -11,6 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
@@ -40,6 +41,13 @@ public class UnlockPasswordDialog extends Dialog {
         this.encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
         this.databaseService = databaseService;
         this.password = password;
+
+        if(password == null ||
+           (password.getDescription() == null || !RegexCheck.containsOnlyLegalCharacters(password.getDescription())) ||
+           (password.getUsername() != null && !RegexCheck.containsOnlyLegalCharacters(password.getUsername())) ||
+           (password.getPassword() == null || !RegexCheck.isBase64(password.getPassword()))) {
+            throw new IllegalArgumentException();
+        }
 
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -94,6 +102,10 @@ public class UnlockPasswordDialog extends Dialog {
         @Override
         public void run() {
             try {
+				if(!RegexCheck.isValidPassword(unlockPasswordField.getValue())) {
+					throw new AEADBadTagException("Entered password contains illegal characters");
+				}
+
                 String decryptedPassword = encryptionAlgorithm.decrypt(
                     password.getPassword(),
                     EncryptionPasswordGenerator.generate(unlockPasswordField.getValue(), username)
@@ -104,7 +116,12 @@ public class UnlockPasswordDialog extends Dialog {
                 Password unlockedPassword = password.clone();
                 unlockedPassword.setPassword(decryptedPassword);
                 ui.access(() -> {
-                    new PasswordDialog(unlockedPassword).open();
+                    try {
+                        new PasswordDialog(unlockedPassword).open();
+                    } catch (Exception e) {
+                        Notification.show(Strings.GENERIC_ERROR);
+                        e.printStackTrace();
+                    }
                     passwordListView.refreshGrid();
                     unlockPasswordDialog.close();
                 });

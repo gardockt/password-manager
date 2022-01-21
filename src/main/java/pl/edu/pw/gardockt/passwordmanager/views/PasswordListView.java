@@ -9,6 +9,7 @@ import com.vaadin.flow.router.Route;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.edu.pw.gardockt.passwordmanager.ApplicationConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.Formatter;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.AddPasswordDialog;
 import pl.edu.pw.gardockt.passwordmanager.dialogs.MessageDialog;
@@ -72,7 +73,12 @@ public class PasswordListView extends VerticalLayout {
         passwordGrid.getColumns().forEach(col -> col.setAutoWidth(true));
         passwordGrid.asSingleSelect().addValueChangeListener(e -> {
             if(e.getValue() != null) {
-                new UnlockPasswordDialog(securityConfiguration, databaseService, e.getValue(), this).open();
+                try {
+                    new UnlockPasswordDialog(securityConfiguration, databaseService, e.getValue(), this).open();
+                } catch (Exception ex) {
+                    Notification.show(Strings.GENERIC_ERROR);
+                    ex.printStackTrace();
+                }
                 passwordGrid.asSingleSelect().setValue(null);
             }
         });
@@ -83,7 +89,19 @@ public class PasswordListView extends VerticalLayout {
 
     public void refreshGrid() {
         passwords = databaseService.getPasswords(user);
-        passwordGrid.setItems(passwords);
+        boolean passwordsCorrect = passwords.stream().allMatch(p ->
+            p != null &&
+            p.getUser().getId().equals(user.getId()) &&
+            p.getPassword() != null && RegexCheck.isBase64(p.getPassword()) &&
+            p.getDescription() != null && RegexCheck.containsOnlyLegalCharacters(p.getDescription()) &&
+            (p.getUsername() == null || RegexCheck.containsOnlyLegalCharacters(p.getUsername()))
+        );
+
+        if(passwordsCorrect) {
+            passwordGrid.setItems(passwords);
+        } else {
+            Notification.show(Strings.GENERIC_ERROR);
+        }
     }
 
     private void openAddPasswordDialog() {

@@ -2,6 +2,7 @@ package pl.edu.pw.gardockt.passwordmanager.services;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import pl.edu.pw.gardockt.passwordmanager.entities.RegistrationData;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.entities.repositories.UserRepository;
@@ -22,10 +23,26 @@ public class UserService {
         this.passwordEncoder = securityConfiguration.getPasswordEncoder();
     }
 
-    public void incrementFailedAttempts(String username) {
+    private void validateUsername(String username) {
         if(username == null) {
             throw new IllegalArgumentException("Username is null");
         }
+        if(!RegexCheck.isValidUsername(username)) {
+            throw new IllegalArgumentException("Invalid username");
+        }
+    }
+
+    private void validatePassword(String password) {
+        if(password == null) {
+            throw new IllegalArgumentException("Password is null");
+        }
+        if(!RegexCheck.isValidPassword(password)) {
+            throw new IllegalArgumentException("Invalid password");
+        }
+    }
+
+    public void incrementFailedAttempts(String username) {
+        validateUsername(username);
 
         // if no rows are updated, we hit the attempt limit
         // this function is called only after user is found, so we don't have to worry about no username found
@@ -36,23 +53,17 @@ public class UserService {
     }
 
     public void resetFailedAttempts(String username) {
-        if(username == null) {
-            throw new IllegalArgumentException("Username is null");
-        }
+        validateUsername(username);
         userRepository.resetFailedAttempts(username);
     }
 
     public void lock(String username) {
-        if(username == null) {
-            throw new IllegalArgumentException("Username is null");
-        }
+        validateUsername(username);
         userRepository.lock(username, new Timestamp(System.currentTimeMillis() + securityConfiguration.lockTimeMillis));
     }
 
     public void unlock(String username) {
-        if(username == null) {
-            throw new IllegalArgumentException("Username is null");
-        }
+        validateUsername(username);
         userRepository.unlock(username);
     }
 
@@ -65,15 +76,9 @@ public class UserService {
         String accountPassword = registrationData.getAccountPassword();
         String unlockPassword = registrationData.getUnlockPassword();
 
-        if(username == null) {
-            throw new IllegalArgumentException("Username is null");
-        }
-        if(accountPassword == null) {
-            throw new IllegalArgumentException("Account password is null");
-        }
-        if(unlockPassword == null) {
-            throw new IllegalArgumentException("Unlock password is null");
-        }
+        validateUsername(username);
+        validatePassword(accountPassword);
+        validatePassword(unlockPassword);
 
         userRepository.save(new User(
             username,

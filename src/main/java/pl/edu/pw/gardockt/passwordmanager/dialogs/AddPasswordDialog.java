@@ -20,6 +20,7 @@ import com.vaadin.flow.shared.Registration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import pl.edu.pw.gardockt.passwordmanager.StringGenerator;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 import pl.edu.pw.gardockt.passwordmanager.components.PasswordFieldWithStrength;
@@ -86,18 +87,22 @@ public class AddPasswordDialog extends Dialog {
         binder.forField(descriptionField)
                 .withValidator(new StringLengthValidator(StringGenerator.getLengthError(1, 64), 1, 64))
                 .withValidator(text -> !text.isBlank(), Strings.BLANK_STRING_ERROR)
+                .withValidator(RegexCheck::containsOnlyLegalCharacters, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .withValidator(text -> existingPasswords.stream().noneMatch(password -> password.getDescription().equals(text)), Strings.VALUE_MUST_BE_UNIQUE)
                 .bind(Password::getDescription, Password::setDescription);
         binder.forField(usernameField)
-                    .withValidator(new StringLengthValidator(StringGenerator.getMaxLengthError(64), 0, 64))
-                    .bind(Password::getUsername, Password::setUsername);
+                .withValidator(new StringLengthValidator(StringGenerator.getMaxLengthError(64), 0, 64))
+                .withValidator(RegexCheck::containsOnlyLegalCharacters, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS) // purposefully not checking a valid username - it's an arbitrary value
+                .bind(Password::getUsername, Password::setUsername);
         binder.forField(passwordField.getPasswordField())
                 .withValidator(new StringLengthValidator(
                     StringGenerator.getLengthError(1, PasswordConfiguration.MAX_LENGTH),
                     1, PasswordConfiguration.MAX_LENGTH))
+                .withValidator(RegexCheck::containsOnlyLegalCharacters, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS) // once again, possibly arbitrary value
                 .bind(Password::getPassword, Password::setPassword);
         binder.forField(repeatPasswordField)
                 .withValidator(text -> passwordField.getPasswordField().getValue().equals(text), Strings.PASSWORDS_NOT_MATCHING)
+                .withValidator(RegexCheck::containsOnlyLegalCharacters, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .bind(Password::getPassword, Password::setPassword);
         binder.bindInstanceFields(this);
     }
@@ -131,7 +136,7 @@ public class AddPasswordDialog extends Dialog {
     }
 
     private byte[] generateUniqueIV() {
-        int ivLength = 12; // should be divisible by 3, see below
+        int ivLength = 12;
 
         Collection<byte[]> existingIVs = existingPasswords.stream().map(
                 p -> Base64.getDecoder().decode(p.getPassword().substring(0, ivLength * 4 / 3))

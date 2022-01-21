@@ -3,6 +3,7 @@ package pl.edu.pw.gardockt.passwordmanager.services;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import pl.edu.pw.gardockt.passwordmanager.ApplicationConfiguration;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import pl.edu.pw.gardockt.passwordmanager.entities.LoginHistory;
 import pl.edu.pw.gardockt.passwordmanager.entities.Password;
 import pl.edu.pw.gardockt.passwordmanager.entities.User;
@@ -36,6 +37,14 @@ public class DatabaseService {
     public void addPassword(Password password) {
         if(password == null) {
             throw new IllegalArgumentException("Password is null");
+        } else if(password.getUser() == null) {
+            throw new IllegalArgumentException("User is null");
+        } else if(password.getUsername() != null && !RegexCheck.containsOnlyLegalCharacters(password.getUsername())) {
+            throw new IllegalArgumentException("Invalid username");
+        } else if(password.getPassword() == null || !RegexCheck.isBase64(password.getPassword())) {
+            throw new IllegalArgumentException("Invalid password");
+        } else if(password.getDescription() == null || !RegexCheck.containsOnlyLegalCharacters(password.getDescription())) {
+            throw new IllegalArgumentException("Invalid description");
         }
 
         passwordRepository.save(password);
