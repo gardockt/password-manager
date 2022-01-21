@@ -34,6 +34,8 @@ public class UnlockPasswordDialog extends Dialog {
     private final Button confirmButton = new Button(Strings.CONFIRM);
     private final Button cancelButton = new Button(Strings.CANCEL, e -> close());
 
+    private boolean unlockInProgress = false;
+
     public UnlockPasswordDialog(SecurityConfiguration securityConfiguration, DatabaseService databaseService, Password password, PasswordListView passwordListView) {
         this.encryptionAlgorithm = securityConfiguration.getEncryptionAlgorithm();
         this.databaseService = databaseService;
@@ -41,7 +43,12 @@ public class UnlockPasswordDialog extends Dialog {
 
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        confirmButton.addClickListener(e -> new UnlockThread(getUI().orElseThrow(), this, passwordListView, userDetails.getUsername()).start());
+        confirmButton.addClickListener(e -> {
+            if(!unlockInProgress) {
+                unlockInProgress = true;
+                new UnlockThread(getUI().orElseThrow(), this, passwordListView, userDetails.getUsername()).start();
+            }
+        });
 
         confirmButton.setWidthFull();
         cancelButton.setWidthFull();
@@ -106,6 +113,8 @@ public class UnlockPasswordDialog extends Dialog {
             } catch (Exception e) {
                 ui.access(() -> Notification.show(Strings.GENERIC_ERROR));
                 e.printStackTrace();
+            } finally {
+                unlockInProgress = false;
             }
         }
 
