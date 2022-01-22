@@ -116,7 +116,7 @@ public class DatabaseService {
             throw new IllegalArgumentException("IP is null");
         }
 
-        IPLock ipLock = getIpLock(ip).orElse(new IPLock(ip));
+        IPLock ipLock = getIpLock(ip).orElse(new IPLock(ip, new Timestamp(System.currentTimeMillis() + securityConfiguration.resetTimeMillis)));
         if(ipLock.getUnlockDatetime() != null) {
             return;
         }

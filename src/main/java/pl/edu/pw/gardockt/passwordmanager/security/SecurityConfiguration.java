@@ -38,8 +38,9 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     @Autowired
     private HttpServletRequest request;
 
-    public final int failedAttemptsLockCount = 10;
-    public final long lockTimeMillis = 5 * 60 * 1000;
+    public final int failedAttemptsLockCount = 20;
+    public final long lockTimeMillis = 10 * 60 * 1000;
+    public final long resetTimeMillis = lockTimeMillis * (failedAttemptsLockCount - 1) / failedAttemptsLockCount; // so that lock is never profitable
     public final int authMinWaitTimeMillis = 100;
     public final int authMaxWaitTimeMillis = 500;
 

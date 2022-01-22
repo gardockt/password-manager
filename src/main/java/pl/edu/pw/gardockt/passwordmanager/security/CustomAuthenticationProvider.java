@@ -52,12 +52,15 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
 
     private void preAuthenticationChecks(UserDetails userDetails) {
         databaseService.getIpLock(request.getRemoteAddr()).ifPresent(l -> {
+            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
             if(l.getUnlockDatetime() != null) {
-                if(new Timestamp(System.currentTimeMillis()).after(l.getUnlockDatetime())) { // unlock IP if the time has come
+                if(currentTime.after(l.getUnlockDatetime())) { // unlock IP if the time has come
                     databaseService.deleteIpLock(l);
                 } else {
                     throw new LockedException("IP is locked due to too many failed attempts");
                 }
+            } else if(currentTime.after(l.getResetDatetime())) {
+                databaseService.deleteIpLock(l);
             }
         });
 

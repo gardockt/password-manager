@@ -40,5 +40,6 @@ CREATE TABLE ip_locks (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     ip VARCHAR(45) NOT NULL,
     failed_attempts TINYINT NOT NULL DEFAULT 0,
-    unlock_datetime DATETIME
+    unlock_datetime DATETIME,
+    reset_datetime DATETIME NOT NULL
 );

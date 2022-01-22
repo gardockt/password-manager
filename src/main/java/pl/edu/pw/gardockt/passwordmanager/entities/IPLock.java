@@ -21,13 +21,17 @@ public class IPLock {
 
 	private Timestamp unlockDatetime;
 
+	@NotNull
+	private Timestamp resetDatetime;
+
 	public IPLock() {
 
 	}
 
-	public IPLock(String ip) {
+	public IPLock(String ip, Timestamp resetDatetime) {
 		this.ip = ip;
 		this.failedAttempts = 0;
+		this.resetDatetime = resetDatetime;
 	}
 
 	public Long getId() {
@@ -62,4 +66,11 @@ public class IPLock {
 		this.unlockDatetime = unlockDatetime;
 	}
 
+	public Timestamp getResetDatetime() {
+		return resetDatetime;
+	}
+
+	public void setResetDatetime(Timestamp resetDatetime) {
+		this.resetDatetime = resetDatetime;
+	}
 }
