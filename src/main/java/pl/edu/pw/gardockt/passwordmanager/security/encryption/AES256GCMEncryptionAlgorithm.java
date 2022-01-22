@@ -41,7 +41,8 @@ public class AES256GCMEncryptionAlgorithm implements EncryptionAlgorithm {
     // random null padding in order to hide password's length
 
     private byte[] padMessage(byte[] message) {
-        int targetPasswordLength = Math.max(message.length, random.nextInt(maxLength + 1));
+        int minLength = 32;
+        int targetPasswordLength = Math.max(message.length, random.nextInt(maxLength - minLength + 1) + minLength);
         return Arrays.copyOf(message, targetPasswordLength);
     }
 
