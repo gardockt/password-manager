@@ -54,11 +54,11 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         setLoginView(http, LoginView.class);
         http
-            .authorizeRequests()
-                .antMatchers("/login").permitAll()
-                .and()
             .requiresChannel()
                 .anyRequest().requiresSecure()
+                .and()
+            .authorizeRequests()
+                .antMatchers("/login").permitAll()
                 .and()
             .formLogin()
                 .failureHandler(new CustomAuthenticationFailureHandler(databaseService));
