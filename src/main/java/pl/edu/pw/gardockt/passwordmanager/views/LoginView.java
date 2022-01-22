@@ -20,7 +20,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     private enum ErrorType {
         INVALID_CREDENTIALS,
-        ACCOUNT_LOCKED
+        LOGIN_BLOCKED
     }
 
     public static final String PAGE_TITLE = Strings.LOGIN;
@@ -68,8 +68,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 errorMessage.setTitle("Nieprawidłowa nazwa użytkownika lub hasło");
                 errorMessage.setMessage("Sprawdź poprawność wprowadzanych danych i spróbuj ponownie");
                 break;
-            case ACCOUNT_LOCKED:
-                errorMessage.setTitle("Konto tymczasowo zablokowane");
+            case LOGIN_BLOCKED:
+                errorMessage.setTitle("Logowanie tymczasowo zablokowane");
                 errorMessage.setMessage("Spróbuj ponownie później");
                 break;
         }
@@ -84,7 +84,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         if(parameters.containsKey("error")) {
             setLoginError(ErrorType.INVALID_CREDENTIALS);
         } else if(parameters.containsKey("locked")) {
-            setLoginError(ErrorType.ACCOUNT_LOCKED);
+            setLoginError(ErrorType.LOGIN_BLOCKED);
         }
     }
 

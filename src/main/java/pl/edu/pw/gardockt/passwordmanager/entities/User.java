@@ -3,7 +3,6 @@ package pl.edu.pw.gardockt.passwordmanager.entities;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 
 @Entity
 @Table(name = "users")
@@ -22,19 +21,11 @@ public class User {
     @NotBlank
     private String unlockPassword;
 
-    @NotNull
-    private Boolean active;
-
     @NotBlank
     private String roles;
 
     @NotNull
-    private Integer failedAttemptsSinceUnlock;
-
-    @NotNull
     private Integer failedAttemptsSinceLogin;
-
-    private Timestamp unlockDatetime;
 
     public User() {
     }
@@ -43,9 +34,7 @@ public class User {
         this.username = username;
         this.accountPassword = accountPassword;
         this.unlockPassword = unlockPassword;
-        this.active = true;
         this.roles = "user";
-        this.failedAttemptsSinceUnlock = 0;
         this.failedAttemptsSinceLogin = 0;
     }
 
@@ -81,28 +70,12 @@ public class User {
         this.unlockPassword = unlockPassword;
     }
 
-    public Boolean isActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
     public String getRoles() {
         return roles;
     }
 
     public void setRoles(String roles) {
         this.roles = roles;
-    }
-
-    public Integer getFailedAttemptsSinceUnlock() {
-        return failedAttemptsSinceUnlock;
-    }
-
-    public void setFailedAttemptsSinceUnlock(Integer failedAttemptsSinceUnlock) {
-        this.failedAttemptsSinceUnlock = failedAttemptsSinceUnlock;
     }
 
     public Integer getFailedAttemptsSinceLogin() {
@@ -113,11 +86,4 @@ public class User {
         this.failedAttemptsSinceLogin = failedAttemptsSinceLogin;
     }
 
-    public Timestamp getUnlockDatetime() {
-        return unlockDatetime;
-    }
-
-    public void setUnlockDatetime(Timestamp unlockDatetime) {
-        this.unlockDatetime = unlockDatetime;
-    }
 }

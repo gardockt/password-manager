@@ -7,10 +7,7 @@ CREATE TABLE users (
     account_password               CHAR(60)      NOT NULL,   -- bcrypt
     unlock_password                CHAR(60)      NOT NULL,   -- bcrypt
     roles                          VARCHAR(64)   NOT NULL DEFAULT 'user',
-    active                         BIT           NOT NULL DEFAULT TRUE,
-    failed_attempts_since_unlock   TINYINT       NOT NULL DEFAULT 0,
-    failed_attempts_since_login    INT           NOT NULL DEFAULT 0,
-    unlock_datetime                DATETIME
+    failed_attempts_since_login    INT           NOT NULL DEFAULT 0
 );
 
 CREATE TABLE passwords (
@@ -37,4 +34,11 @@ CREATE TABLE login_history (
     last_access    DATETIME    NOT NULL,
     CONSTRAINT FK_login_history_user_id FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT FK_login_history_user_agent_id FOREIGN KEY (user_agent_id) REFERENCES user_agents(id)
+);
+
+CREATE TABLE ip_locks (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ip VARCHAR(45) NOT NULL,
+    failed_attempts TINYINT NOT NULL DEFAULT 0,
+    unlock_datetime DATETIME
 );

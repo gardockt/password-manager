@@ -8,17 +8,13 @@ import pl.edu.pw.gardockt.passwordmanager.entities.User;
 import pl.edu.pw.gardockt.passwordmanager.entities.repositories.UserRepository;
 import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 
-import java.sql.Timestamp;
-
 @Service
 public class UserService {
 
-    private final SecurityConfiguration securityConfiguration;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(SecurityConfiguration securityConfiguration, UserRepository userRepository) {
-        this.securityConfiguration = securityConfiguration;
         this.userRepository = userRepository;
         this.passwordEncoder = securityConfiguration.getPasswordEncoder();
     }
@@ -43,28 +39,12 @@ public class UserService {
 
     public void incrementFailedAttempts(String username) {
         validateUsername(username);
-
-        // if no rows are updated, we hit the attempt limit
-        // this function is called only after user is found, so we don't have to worry about no username found
         userRepository.incrementFailedAttemptsSinceLogin(username);
-        if(userRepository.incrementFailedAttemptsSinceUnlock(username, securityConfiguration.failedAttemptsLockCount) == 0) {
-            lock(username);
-        }
     }
 
     public void resetFailedAttempts(String username) {
         validateUsername(username);
         userRepository.resetFailedAttempts(username);
-    }
-
-    public void lock(String username) {
-        validateUsername(username);
-        userRepository.lock(username, new Timestamp(System.currentTimeMillis() + securityConfiguration.lockTimeMillis));
-    }
-
-    public void unlock(String username) {
-        validateUsername(username);
-        userRepository.unlock(username);
     }
 
     public void register(RegistrationData registrationData) {

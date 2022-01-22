@@ -22,42 +22,22 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
     private final HttpServletRequest request;
 
     public CustomAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, UserService userService, DatabaseService databaseService, HttpServletRequest request) {
-        setUserDetailsService(userDetailsService);
-        setPasswordEncoder(passwordEncoder);
         this.userService = userService;
         this.databaseService = databaseService;
         this.request = request;
+
+        setUserDetailsService(userDetailsService);
+        setPasswordEncoder(passwordEncoder);
+
+        setPreAuthenticationChecks(this::preAuthenticationChecks);
     }
 
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
-        // get CustomUserDetails
-        CustomUserDetails customUserDetails;
-        try {
-            customUserDetails = (CustomUserDetails) userDetails;
-        } catch (ClassCastException e) {
-            throw new InternalAuthenticationServiceException("Invalid user details class");
-        }
-
-        Timestamp unlockDatetime = customUserDetails.getUser().getUnlockDatetime();
-
-        if(unlockDatetime != null) {
-            if(new Timestamp(System.currentTimeMillis()).after(unlockDatetime)) { // unlock account if the time has come
-                userService.unlock(customUserDetails.getUsername());
-            } else { // lock is on, deny authentication
-                throw new LockedException("Account is locked due to too many failed attempts");
-            }
-        }
-
-        // prevent clients without User-Agent
-        if(request.getHeader("User-Agent") == null) {
-            throw new AccountStatusException("User-Agent not found") {};
-        }
-
         try {
             super.additionalAuthenticationChecks(userDetails, authentication);
         } catch (AuthenticationException e) {
-            userService.incrementFailedAttempts(customUserDetails.getUsername());
+            userService.incrementFailedAttempts(userDetails.getUsername());
             throw e;
         }
     }
@@ -68,6 +48,24 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
         userService.resetFailedAttempts(user.getUsername());
         databaseService.addLoginHistory(((CustomUserDetails)user).getUser(), webAuthenticationDetails.getRemoteAddress(), request.getHeader("User-Agent"));
         return super.createSuccessAuthentication(principal, authentication, user);
+    }
+
+    private void preAuthenticationChecks(UserDetails userDetails) {
+        databaseService.getIpLock(request.getRemoteAddr()).ifPresent(l -> {
+            if(l.getUnlockDatetime() != null) {
+                if(new Timestamp(System.currentTimeMillis()).after(l.getUnlockDatetime())) { // unlock IP if the time has come
+                    databaseService.deleteIpLock(l);
+                } else {
+                    throw new LockedException("IP is locked due to too many failed attempts");
+                }
+            }
+        });
+
+        // prevent clients without User-Agent
+        if(request.getHeader("User-Agent") == null) {
+            // unfortunately, only few exceptions interrupt authentication and this is probably the most fitting one
+            throw new AccountStatusException("User-Agent not found") {};
+        }
     }
 
 }

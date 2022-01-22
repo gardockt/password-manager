@@ -60,7 +60,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
                 .anyRequest().requiresSecure()
                 .and()
             .formLogin()
-                .failureHandler(new CustomAuthenticationFailureHandler());
+                .failureHandler(new CustomAuthenticationFailureHandler(databaseService));
         super.configure(http);
     }
 

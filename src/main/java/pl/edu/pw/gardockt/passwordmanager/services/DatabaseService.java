@@ -4,17 +4,17 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import pl.edu.pw.gardockt.passwordmanager.ApplicationConfiguration;
 import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
-import pl.edu.pw.gardockt.passwordmanager.entities.LoginHistory;
-import pl.edu.pw.gardockt.passwordmanager.entities.Password;
-import pl.edu.pw.gardockt.passwordmanager.entities.User;
-import pl.edu.pw.gardockt.passwordmanager.entities.UserAgent;
+import pl.edu.pw.gardockt.passwordmanager.entities.*;
+import pl.edu.pw.gardockt.passwordmanager.entities.repositories.IPLockRepository;
 import pl.edu.pw.gardockt.passwordmanager.entities.repositories.LoginHistoryRepository;
 import pl.edu.pw.gardockt.passwordmanager.entities.repositories.PasswordRepository;
 import pl.edu.pw.gardockt.passwordmanager.entities.repositories.UserAgentRepository;
+import pl.edu.pw.gardockt.passwordmanager.security.SecurityConfiguration;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DatabaseService {
@@ -22,11 +22,16 @@ public class DatabaseService {
     private final PasswordRepository passwordRepository;
     private final UserAgentRepository userAgentRepository;
     private final LoginHistoryRepository loginHistoryRepository;
+    private final IPLockRepository ipLockRepository;
 
-    public DatabaseService(PasswordRepository passwordRepository, UserAgentRepository userAgentRepository, LoginHistoryRepository loginHistoryRepository) {
+    private final SecurityConfiguration securityConfiguration;
+
+    public DatabaseService(PasswordRepository passwordRepository, UserAgentRepository userAgentRepository, LoginHistoryRepository loginHistoryRepository, IPLockRepository ipLockRepository, SecurityConfiguration securityConfiguration) {
         this.passwordRepository = passwordRepository;
         this.userAgentRepository = userAgentRepository;
         this.loginHistoryRepository = loginHistoryRepository;
+        this.ipLockRepository = ipLockRepository;
+        this.securityConfiguration = securityConfiguration;
     }
 
     public List<Password> getPasswords(User user) {
@@ -88,6 +93,40 @@ public class DatabaseService {
         }
 
         return loginHistoryRepository.getByUser(user);
+    }
+
+    public Optional<IPLock> getIpLock(String ip) {
+        if(ip == null) {
+            throw new IllegalArgumentException("IP is null");
+        }
+
+        return ipLockRepository.getByIp(ip);
+    }
+
+    public void deleteIpLock(IPLock ipLock) {
+        if(ipLock == null) {
+            throw new IllegalArgumentException("IP lock is null");
+        }
+
+        ipLockRepository.delete(ipLock);
+    }
+
+    public void incrementFailedAttempts(String ip) {
+        if(ip == null) {
+            throw new IllegalArgumentException("IP is null");
+        }
+
+        IPLock ipLock = getIpLock(ip).orElse(new IPLock(ip));
+        if(ipLock.getUnlockDatetime() != null) {
+            return;
+        }
+
+        int newFailedAttempts = ipLock.getFailedAttempts() + 1;
+        ipLock.setFailedAttempts(newFailedAttempts);
+        if(newFailedAttempts >= securityConfiguration.failedAttemptsLockCount) {
+            ipLock.setUnlockDatetime(new Timestamp(System.currentTimeMillis() + securityConfiguration.lockTimeMillis));
+        }
+        ipLockRepository.save(ipLock);
     }
 
 }
