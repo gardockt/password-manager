@@ -47,10 +47,12 @@ public class PasswordListView extends VerticalLayout {
         user = userDetails.getUser();
 
         if(user.getFailedAttemptsSinceLogin() >= securityConfiguration.failedAttemptsLockCount) {
-            new MessageDialog(
+            try {
+                new MessageDialog(
                     "Liczba nieudanych prób logowania od ostatniego poprawnego zalogowania: " + user.getFailedAttemptsSinceLogin(),
                     "Ostrzeżenie"
-            ).open();
+                ).open();
+            } catch (IllegalArgumentException ignored) {};
             user.setFailedAttemptsSinceLogin(0);
         }
 
@@ -101,6 +103,7 @@ public class PasswordListView extends VerticalLayout {
             passwordGrid.setItems(passwords);
         } else {
             Notification.show(Strings.GENERIC_ERROR);
+            System.err.println("Error getting passwords for user " + user.getId());
         }
     }
 

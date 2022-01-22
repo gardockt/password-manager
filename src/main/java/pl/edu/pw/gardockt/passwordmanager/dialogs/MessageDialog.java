@@ -7,11 +7,16 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import pl.edu.pw.gardockt.passwordmanager.RegexCheck;
 import pl.edu.pw.gardockt.passwordmanager.Strings;
 
 public class MessageDialog extends Dialog {
 
     public MessageDialog(String message, String title) {
+        if(!RegexCheck.containsOnlyLegalCharacters(message) || !RegexCheck.containsOnlyLegalCharacters(title)) {
+            throw new IllegalArgumentException("Illegal characters detected");
+        }
+
         setMaxWidth("30em");
 
         H3 titleObject = new H3(title);
