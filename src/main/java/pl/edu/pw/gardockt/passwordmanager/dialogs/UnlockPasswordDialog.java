@@ -111,6 +111,10 @@ public class UnlockPasswordDialog extends Dialog {
                     EncryptionPasswordGenerator.generate(unlockPasswordField.getValue(), username)
                 );
 
+                if(!RegexCheck.isValidStoredPassword(decryptedPassword)) {
+                    throw new IllegalArgumentException("Decrypted password contains illegal characters");
+                }
+
                 // password unlocked successfully
                 databaseService.updatePasswordLastAccess(password);
                 Password unlockedPassword = password.clone();

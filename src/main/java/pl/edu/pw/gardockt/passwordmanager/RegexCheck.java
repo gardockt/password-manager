@@ -7,6 +7,7 @@ public class RegexCheck {
 	private final static Pattern legalCharactersPattern = Pattern.compile("[\\p{L}\\d_!#$&%()*+,\\-./:<=>?@^|~ ]*");
 	private final static Pattern validUsernamePattern = Pattern.compile("[\\w\\-]*");
 	private final static Pattern validPasswordPattern = Pattern.compile("[\\w!#$%&()*+,\\-./:<=>?@^|~ ]*");
+	private final static Pattern storedPasswordPattern = Pattern.compile("[\\p{L}\\d\\p{Punct} ]*");
 	private final static Pattern base64Pattern = Pattern.compile("[A-Za-z\\d+/]*=*");
 
 	public static boolean containsOnlyLegalCharacters(String text) {
@@ -19,6 +20,10 @@ public class RegexCheck {
 
 	public static boolean isValidPassword(String password) {
 		return validPasswordPattern.matcher(password).matches();
+	}
+
+	public static boolean isValidStoredPassword(String password) {
+		return storedPasswordPattern.matcher(password).matches();
 	}
 
 	public static boolean isBase64(String text) {

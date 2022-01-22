@@ -24,7 +24,7 @@ public class PasswordDialog extends Dialog {
 
         boolean includeUsername = (password.getUsername() != null && !password.getUsername().isBlank());
 
-        if((password.getPassword() == null || !RegexCheck.containsOnlyLegalCharacters(password.getPassword())) ||
+        if((password.getPassword() == null || !RegexCheck.isValidStoredPassword(password.getPassword())) ||
            (includeUsername && !RegexCheck.containsOnlyLegalCharacters(password.getUsername())) ||
            (password.getDescription() == null || !RegexCheck.containsOnlyLegalCharacters(password.getDescription()))) {
             throw new IllegalArgumentException();

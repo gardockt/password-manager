@@ -98,11 +98,11 @@ public class AddPasswordDialog extends Dialog {
                 .withValidator(new StringLengthValidator(
                     StringGenerator.getLengthError(1, PasswordConfiguration.MAX_LENGTH),
                     1, PasswordConfiguration.MAX_LENGTH))
-                .withValidator(RegexCheck::containsOnlyLegalCharacters, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS) // once again, possibly arbitrary value
+                .withValidator(RegexCheck::isValidStoredPassword, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS) // sent as Base64 - we can allow more characters
                 .bind(Password::getPassword, Password::setPassword);
         binder.forField(repeatPasswordField)
                 .withValidator(text -> passwordField.getPasswordField().getValue().equals(text), Strings.PASSWORDS_NOT_MATCHING)
-                .withValidator(RegexCheck::containsOnlyLegalCharacters, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
+                .withValidator(RegexCheck::isValidStoredPassword, Strings.VALUE_CONTAINS_ILLEGAL_CHARACTERS)
                 .bind(Password::getPassword, Password::setPassword);
         binder.bindInstanceFields(this);
     }
